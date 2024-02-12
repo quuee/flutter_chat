@@ -1,0 +1,13 @@
+{
+  "bottomNavChat": "Chat",
+  "bottomNavContacts": "Contacts",
+  "bottomNavExplore": "Explore",
+  "bottomNavMe": "Me",
+  "welcomeLogin":"Welcome Login",
+  "appbarTitle":"Contacts",
+
+  "titleOtherView": "OtherView",
+  "settingsTheme": "Theme",
+  "settingsLanguage": "Language",
+  "settingsFontSize": "Font Size"
+}
