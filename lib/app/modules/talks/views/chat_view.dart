@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_chat/app/core/values/app_colors.dart';
@@ -10,13 +11,14 @@ import 'package:get/get.dart';
 
 /// 进入聊天界面
 class ChatView extends GetView<ChatController> {
+  const ChatView({super.key});
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: CustomAppBar(
-        appBarTitleText: controller.contacter!.nickname,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz))],
+        appBarTitleText: controller.conversation?.conversationName??'',
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz))],
       ),
       resizeToAvoidBottomInset: true, //默认是 true
       backgroundColor: AppColors.pageBackground,
@@ -34,7 +36,7 @@ class ChatView extends GetView<ChatController> {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: AppValues.padding),
-                child: Obx(() => _buildChatList()),
+                child: Obx(() => controller.messageMapListG[controller.conversation?.conversationId] != null? _buildChatList():const SizedBox.shrink()),
               ),
             )),
 
@@ -132,19 +134,23 @@ class ChatView extends GetView<ChatController> {
     // ),
     return ListView.builder(
         controller: controller.scrollController,
-        itemCount: controller.messageList.length,
+        itemCount: controller.messageMapListG[controller.conversation?.conversationId]?.length??0,
         // shrinkWrap: true,
         itemBuilder: (c, i) {
-          ReceiveInfo receiveInfo = controller.messageList[i];
+          ReceiveInfo receiveInfo = controller.messageMapListG[controller.conversation?.conversationId]![i];
           MainAxisAlignment layout =
-          receiveInfo.sender.userId != controller.userDO?.userId ? MainAxisAlignment.start : MainAxisAlignment.end;
+              receiveInfo.sender.userId != controller.currentUser?.userId
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.end;
 
           return Column(
             children: [
               Row(
                 mainAxisAlignment: layout,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [Text(receiveInfo.data)],
+                children: [
+                  // CachedNetworkImage(imageUrl: receiveInfo.)
+                  Text(receiveInfo.data)],
               ),
             ],
           );

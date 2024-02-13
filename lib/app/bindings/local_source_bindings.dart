@@ -1,22 +1,41 @@
-import 'package:flutter_chat/app/network/websocket_provider.dart';
+import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
+import 'package:flutter_chat/app/modules/talks/model/chat_log_model.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '/app/data/local/preference/preference_manager.dart';
 import '/app/data/local/preference/preference_manager_impl.dart';
 
 class LocalSourceBindings implements Bindings {
   @override
-  void dependencies() {
+  Future<void> dependencies() async {
     Get.lazyPut<PreferenceManager>(
       () => PreferenceManagerImpl(),
       tag: (PreferenceManager).toString(),
       fenix: true,
     );
 
-    Get.lazyPut<WebSocketProvider>(
-          () => WebSocketProvider(),
-      tag: (WebSocketProvider).toString(),
-      fenix: true,
+    // Get.lazyPut<IsarManager>(
+    //       () => IsarManager(),
+    //   tag: (IsarManager).toString(),
+    //   fenix: true,
+    // );
+    Isar isar = await initIsar();
+    Get.put<Isar>(isar,tag: (Isar).toString(),permanent: true);
+
+
+  }
+
+  initIsar() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return Isar.open(
+      [
+        ConversationModelSchema,
+        ChatLogModelSchema,
+      ],
+      directory: dir.path,
     );
   }
+
 }

@@ -52,14 +52,14 @@ class ContactsController extends BaseController {
             nickname: '新朋友',
             phone: '',
             email: '',
-            avatarUrl: ''),
+            avatarUrl: 'http://192.168.1.7:9000/images/add_contact.png'),
         ContacterModel(
             userId: 0,
             account: '',
             nickname: '群聊',
             phone: '',
             email: '',
-            avatarUrl: 'http://192.168.1.7:9000/images/add_contact.png'),
+            avatarUrl: 'http://192.168.1.7:9000/images/group_message.png'),
       ],
     },
     {

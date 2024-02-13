@@ -1,14 +1,17 @@
+import 'package:flutter_chat/app/data/global/global_value_controller.dart';
 import 'package:flutter_chat/app/core/permission_controller.dart';
+import 'package:flutter_chat/app/network/websocket_provider.dart';
 import 'package:get/get.dart';
 
 import 'local_source_bindings.dart';
 
 class InitialBinding implements Bindings {
   @override
-  void dependencies() {
+  Future<void> dependencies() async {
 
-    LocalSourceBindings().dependencies();
+    await LocalSourceBindings().dependencies();
     Get.put<PermissionController>(PermissionController());
-
+    Get.put<WebSocketProvider>(WebSocketProvider(),permanent: true);//permanent: true 实例将在整个应用程序中保持活动状态,不会被释放
+    Get.put<GlobalValueController>(GlobalValueController(),permanent: true);
   }
 }

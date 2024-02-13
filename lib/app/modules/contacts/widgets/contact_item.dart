@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
@@ -8,7 +7,8 @@ import 'package:flutter_chat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
 class ContactItem extends StatelessWidget {
-  ContactItem({super.key, required this.contactsHeight,required this.contacterModel});
+  ContactItem(
+      {super.key, required this.contactsHeight, required this.contacterModel});
 
   double contactsHeight;
   ContacterModel contacterModel;
@@ -19,32 +19,32 @@ class ContactItem extends StatelessWidget {
       child: Container(
         decoration: const BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-                width: 0.5, color: Colors.blueGrey),
+            bottom: BorderSide(width: 0.5, color: Colors.blueGrey),
           ),
         ),
         height: contactsHeight,
         child: Padding(
-          padding:
-          const EdgeInsets.only(left: AppValues.padding_4),
+          padding: const EdgeInsets.only(left: AppValues.padding_4),
           child: Row(
             children: [
               CachedNetworkImage(
-                imageUrl: contacterModel.avatarUrl,
-                width: AppValues.iconDefaultSize,
-                height: AppValues.iconDefaultSize,
-                placeholder: (context, url) =>
-                const CircularProgressIndicator(),
-                errorWidget: (context, url, error) =>
-                const AssetImageView(width: AppValues.iconDefaultSize,height: AppValues.iconDefaultSize,fileName: 'add_contact.svg')
-              ),
+                  imageUrl: contacterModel.avatarUrl,
+                  width: AppValues.iconDefaultSize *2,
+                  height: AppValues.iconDefaultSize *2,
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => const AssetImageView(
+                      width: AppValues.iconDefaultSize,
+                      height: AppValues.iconDefaultSize,
+                      fileName: 'add_contact.svg')),
               Text(contacterModel.nickname)
             ],
           ),
         ),
       ),
-      onTap: (){
-        Get.toNamed(Routes.CONTACT_SIMPLE,arguments: contacterModel);
+      onTap: () {
+
+        Get.toNamed(Routes.CONTACT_SIMPLE, arguments: contacterModel);
       },
     );
   }

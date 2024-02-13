@@ -4,7 +4,9 @@ import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
+import 'package:flutter_chat/app/model/cmd_type.dart';
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
+import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:flutter_chat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +16,7 @@ class ContactSimple extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    ContacterModel data = Get.arguments;
+    ContacterModel contact = Get.arguments;
 
     return Scaffold(
       appBar: CustomAppBar(appBarTitleText: '',actions: [IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz))],),
@@ -23,13 +25,13 @@ class ContactSimple extends StatelessWidget {
         children: [
           // 头像区域
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppValues.padding),
+            padding: const EdgeInsets.symmetric(horizontal: AppValues.padding),
             child: Row(
               children: [
                 CachedNetworkImage(
-                  width: 120,
-                  height: 120,
-                  imageUrl: data.avatarUrl,
+                  width: AppValues.iconLargeSize * 3,
+                  height: AppValues.iconLargeSize * 3,
+                  imageUrl: contact.avatarUrl,
                   placeholder: (context, url) =>
                       const CircularProgressIndicator(),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -38,10 +40,10 @@ class ContactSimple extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        data.nickname,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
+                        contact.nickname,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
                     ),
                     Text(
-                        data.phone,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
+                        contact.phone,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
                     )
                   ],
                 ),
@@ -64,7 +66,7 @@ class ContactSimple extends StatelessWidget {
                   const Text('设置备注', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)),
                   const SizedBox(width: AppValues.smallPadding),
                   Text(
-                    data.nickname,
+                    contact.nickname,
                     style: const TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: AppColors.colorPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -134,8 +136,12 @@ class ContactSimple extends StatelessWidget {
               ),
             ),
             onTap: () {
-              Get.toNamed(Routes.TOCHAT,arguments: data);
-              // TODO 会话存入本地数据库
+              var conversation = ConversationModel(
+                conversationName: contact.nickname,
+                cmd: CmdType.PRIVATE_MESSAGE,
+                contactUserIds: [contact.userId],
+                avatarUrl: contact.avatarUrl,);
+              Get.toNamed(Routes.TOCHAT,arguments: conversation);
             },
           ),
           Padding(

@@ -5,7 +5,9 @@ import 'flavors/build_config.dart';
 import 'flavors/env_config.dart';
 import 'flavors/environment.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   EnvConfig devConfig = EnvConfig(
     appName: "Flutter GetX Chat Dev",
     baseUrl: "http://192.168.1.100:41000",
@@ -17,7 +19,7 @@ void main() {
     envType: Environment.DEVELOPMENT,
     envConfig: devConfig,
   );
-
+  // await IsarManager.instance.init();
 
 
   runApp(const MyApp());

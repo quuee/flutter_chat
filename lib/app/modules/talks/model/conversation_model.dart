@@ -2,42 +2,74 @@
 
 import 'dart:convert';
 
+import 'package:flutter_chat/app/model/receive_info.dart';
+import 'package:get/get.dart';
+import 'package:isar/isar.dart';
+
+part 'conversation_model.g.dart';
+//dart run build_runner build
+
 List<ConversationModel> conversationModelFromJson(String str) => List<ConversationModel>.from(json.decode(str).map((x) => ConversationModel.fromJson(x)));
 
 String conversationModelToJson(List<ConversationModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
+@collection
 class ConversationModel {
-  int id;
-  int concatUserId;
-  String contactName;
+
+  @Name('conversationId')
+  Id? conversationId;
+  @Name('conversationName')
+  String conversationName; // 群聊名 或 联系人名
+  @Name('cmd')
+  int cmd;
+  @Name('contactUserId')
+  List<int> contactUserIds; // 只要sender不是本人发的都是联系人
+  @Name('currentUserId')
+  int? currentUserId;
+  @Name('avatarUrl')
   String avatarUrl;
-  String lastTime;
-  String lastMessage;
+  @Name('lastTime')
+  String? lastTime;
+  @Name('lastMessage')
+  String? lastMessage;
+
+  // @Ignore()
+  // RxList<ReceiveInfo>? messageList;
 
   ConversationModel({
-    required this.id,
-    required this.concatUserId,
-    required this.contactName,
+    this.conversationId,
+    required this.conversationName,
+    required this.cmd,
+    required this.contactUserIds,
+    this.currentUserId,
     required this.avatarUrl,
-    required this.lastTime,
-    required this.lastMessage,
+    this.lastTime,
+    this.lastMessage,
+    // this.messageList,
   });
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) => ConversationModel(
-    id: json["id"],
-    concatUserId: json["concatUserId"],
-    contactName: json["contactName"],
+    conversationId: json["conversationId"],
+    conversationName: json["conversationName"],
+    cmd: json["cmd"],
+    contactUserIds: json["contactUserIds"],
+    currentUserId: json["currentUserId"],
+
     avatarUrl: json["avatarUrl"],
     lastTime: json["lastTime"],
     lastMessage: json["lastMessage"],
+    // messageList: json["messageList"],
   );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "concatUserId": concatUserId,
-    "contactName": contactName,
+    "conversationId": conversationId,
+    "conversationName": conversationName,
+    "cmd": cmd,
+    "contactUserIds": contactUserIds,
+    "currentUserId": currentUserId,
     "avatarUrl": avatarUrl,
     "lastTime": lastTime,
     "lastMessage": lastMessage,
+    // "messageList": messageList,
   };
 }

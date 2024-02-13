@@ -49,7 +49,7 @@ class DioUtil {
           // 如果你想终止请求并触发一个错误，你可以使用 `handler.reject(error)`。
 
           String token = '';
-          if(token!=null && token != _mDio.options.headers['authorization']){
+          if(token != _mDio.options.headers['authorization']){
             Map<String,dynamic> header = Map();
             header['Authorization'] = token;
             options.headers.addAll(header);
