@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/core/date_util.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/paging_view.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
@@ -50,27 +51,30 @@ class ConversationView extends BaseView<ConversationController> {
         alignment: Alignment.centerRight,
         child: const Icon(Icons.delete),
       ),
-      child: InkWell(
-        child: Row(
-          children: [
-            CachedNetworkImage(
-                width: AppValues.iconLargeSize * 2,
-                height: AppValues.iconLargeSize * 2,
-                imageUrl: conversation.avatarUrl),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(conversation.conversationName),
-                Text(conversation.lastMessage ?? ''),
-              ],
-            ),
-            Spacer(),
-            Text(conversation.lastTime ?? ''),
-          ],
+      child: SizedBox(
+        height: AppValues.iconLargeSize * 2,
+        child: InkWell(
+          child: Row(
+            children: [
+              CachedNetworkImage(
+                  width: AppValues.iconLargeSize * 2,
+                  height: AppValues.iconLargeSize * 2,
+                  imageUrl: conversation.avatarUrl),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(conversation.conversationName),
+                  Text(conversation.lastMessage ?? '',maxLines: 1,overflow: TextOverflow.ellipsis,),
+                ],
+              ),
+              Spacer(),
+              Text(DateUtil.formatTime(conversation.lastTime) ?? ''),
+            ],
+          ),
+          onTap: () {
+            Get.toNamed(Routes.TOCHAT, arguments: conversation);
+          },
         ),
-        onTap: () {
-          Get.toNamed(Routes.TOCHAT, arguments: conversation);
-        },
       ),
       onDismissed: (direction) {
         controller.deleteConversation(conversation.conversationId!);

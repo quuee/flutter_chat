@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter_chat/app/data/local/preference/preference_manager.dart';
-import 'package:flutter_chat/app/model/cmd_type.dart';
-import 'package:flutter_chat/app/model/message_wrapper.dart';
-import 'package:flutter_chat/app/model/receive_info.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/modules/talks/model/chat_log_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
+import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/message_wrapper.dart';
 import 'package:flutter_chat/app/network/websocket_provider.dart';
 import 'package:flutter_chat/flavors/build_config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,7 +21,7 @@ class GlobalValueController extends GetxController {
   final WebSocketProvider webSocketProvider = Get.find<WebSocketProvider>();
   // 会话对象
   RxList<ConversationModel> conversationList = RxList.empty(growable: true);
-  RxMap<int, RxList<ReceiveInfo>> messageMapList = RxMap.identity();
+  RxMap<int, RxList<MessageInfo>> messageMapList = RxMap.identity();
 
   // 在会话界面收到消息，打开聊天界面 消息需要一致存在
 
@@ -47,11 +47,13 @@ class GlobalValueController extends GetxController {
           // logger.i('Received: $msg');
           MessageWrapper data = MessageWrapper.fromJson(json.decode(msg));
           if (data.cmd == CmdType.PRIVATE_MESSAGE) {
-            ReceiveInfo receiveInfo = ReceiveInfo.fromJson(data.data);
+            MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
             for (var conversation in conversationList) {
               if (conversation.contactUserIds.first ==
                   receiveInfo.sender.userId) {
+
                 conversation.lastMessage = receiveInfo.data;
+
                 messageMapList[conversation.conversationId]?.add(receiveInfo);
 
                 isarSaveMessage([receiveInfo],conversation.conversationId!);
@@ -69,9 +71,10 @@ class GlobalValueController extends GetxController {
         }, onError: (error) {
           Fluttertoast.showToast(msg: error.toString());
         });
+        webSocketProvider.startHeartBeat();
       }
     });
-    webSocketProvider.startHeartBeat();
+
   }
 
   // 加载用户信息
@@ -112,7 +115,7 @@ class GlobalValueController extends GetxController {
   }
 
   // 消息存入本地数据库
-  isarSaveMessage(List<ReceiveInfo> receiveInfoList, int conversationId) {
+  isarSaveMessage(List<MessageInfo> receiveInfoList, int conversationId) {
     List<ChatLogModel> list = receiveInfoList
         .map((e) => ChatLogModel.convertFromReceiveInfo(
             e, currentUser!.userId, conversationId))
@@ -133,8 +136,9 @@ class GlobalValueController extends GetxController {
     List<ChatLogModel> chats = _isar.chatLogModels
         .filter()
         .conversationIdEqualTo(conversationId)
+    .limit(50)
         .findAllSync();
-    List<ReceiveInfo> temp =
+    List<MessageInfo> temp =
         chats.map((e) => ChatLogModel.convertToReceiveInfo(e)).toList();
 
     // if(messageMapList[conversationId]!=null && messageMapList[conversationId]!.isNotEmpty){
@@ -146,8 +150,8 @@ class GlobalValueController extends GetxController {
   }
 
   // 更新messageMapList
-  messageMapListAdd(int conversationId,ReceiveInfo receiveInfo){
-    List<ReceiveInfo> messageList = messageMapList[conversationId] ?? RxList.empty(growable: true);
+  messageMapListAdd(int conversationId,MessageInfo receiveInfo){
+    List<MessageInfo> messageList = messageMapList[conversationId] ?? RxList.empty(growable: true);
     messageList.add(receiveInfo);
     messageMapList.addAll({conversationId:RxList(messageList)});
   }

@@ -4,9 +4,9 @@ import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
-import 'package:flutter_chat/app/model/cmd_type.dart';
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
+import 'package:flutter_chat/app/network/model/cmd_type.dart';
 import 'package:flutter_chat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
@@ -40,19 +40,19 @@ class ContactSimple extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        contact.nickname,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
+                        contact.nickname,style: const TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
                     ),
                     Text(
-                        contact.phone,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
+                        contact.phone,style: const TextStyle(fontSize: 16,fontWeight: FontWeight.w400)
                     )
                   ],
                 ),
               ],
             ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: AppValues.padding),
-            child: const Divider(
+            child: Divider(
               height: 0.5,
               color: Colors.grey,
             ),

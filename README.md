@@ -2,15 +2,9 @@
 
 flutter chat
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## TODO
+- [x] 消息多时被键盘挡住 (listview reverse: true，消息列表取反)
+- [] 消息在重连后推送到客户端
+- [] 消息历史消息上拉拉取
+- [] token过期
+- [] 好友发送消息 创建会话

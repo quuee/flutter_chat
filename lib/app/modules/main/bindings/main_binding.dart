@@ -1,3 +1,4 @@
+import 'package:flutter_chat/app/data/global/global_value_controller.dart';
 import 'package:flutter_chat/app/modules/talks/controllers/conversation_controller.dart';
 import 'package:flutter_chat/app/modules/contacts/controllers/contacts_controller.dart';
 import 'package:flutter_chat/app/modules/explore/controllers/explore_controller.dart';
@@ -32,5 +33,7 @@ class MainBinding extends Bindings {
           () => MeController(),
       fenix: true,
     );
+
+    Get.put<GlobalValueController>(GlobalValueController(),permanent: true);
   }
 }

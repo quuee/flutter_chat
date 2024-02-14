@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_chat/app/model/cmd_type.dart';
-import 'package:flutter_chat/app/model/message_wrapper.dart';
+import 'package:flutter_chat/app/network/model/message_wrapper.dart';
 import 'package:get/get.dart' as getx;
 import 'package:web_socket_channel/io.dart';
 
@@ -10,6 +9,8 @@ import '/app/data/local/preference/preference_manager.dart';
 import '/flavors/build_config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
+
+import 'model/cmd_type.dart';
 
 
 enum ConnectStatusEnum { connect, connecting, close, closing }

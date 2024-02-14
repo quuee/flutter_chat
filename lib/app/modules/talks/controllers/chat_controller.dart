@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/id_util.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
-import 'package:flutter_chat/app/model/cmd_type.dart';
-import 'package:flutter_chat/app/model/message_wrapper.dart';
-import 'package:flutter_chat/app/model/receive_info.dart';
-import 'package:flutter_chat/app/model/send_info.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
-import 'package:flutter_chat/app/model/user_info.dart';
+import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/message_wrapper.dart';
+import 'package:flutter_chat/app/network/model/user_info.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:flutter_chat/app/network/websocket_provider.dart';
 import 'package:flutter_chat/flavors/build_config.dart';
@@ -33,7 +32,7 @@ class ChatController extends GetxController {
       Get.find<GlobalValueController>();
 
   UserDO? get currentUser => _globalValueController.currentUser;
-  RxMap<int, RxList<ReceiveInfo>> get messageMapListG =>
+  RxMap<int, RxList<MessageInfo>> get messageMapListG =>
       _globalValueController.messageMapList;
 
   @override
@@ -55,7 +54,7 @@ class ChatController extends GetxController {
     // 点进去不做任何操作退出来 没有一条信息
     if (messageMapListG[conversation?.conversationId]!.isNotEmpty) {
       conversation?.lastMessage = messageMapListG[conversation?.conversationId]!.last.data;
-      conversation?.lastTime = DateTime.now().toIso8601String();
+      conversation?.lastTime = DateTime.now().toString();
       conversation?.currentUserId = currentUser!.userId;
 
       _globalValueController.isarSaveConversation(conversation!);
@@ -89,7 +88,7 @@ class ChatController extends GetxController {
   }
 
   Future<void> sendMessage() async {
-    SendInfo sendInfo = SendInfo(
+    MessageInfo sendInfo = MessageInfo(
         cmd: CmdType.PRIVATE_MESSAGE,
         sender: UserInfo(
             userId: _globalValueController.currentUser!.userId,
@@ -99,15 +98,15 @@ class ChatController extends GetxController {
             (index) => UserInfo(
                 userId: conversation!.contactUserIds[index],
                 terminal: TerminalType.APP)),
-        sendResult: false,
-        serviceName: 'xxx',
+        serviceName: '',
+        messageTime: DateTime.now().toString(),
         data: sendMessageStr.value);
     var messageWrapper =
         MessageWrapper(cmd: CmdType.PRIVATE_MESSAGE, data: sendInfo);
 
     _globalValueController.sendMessage(messageWrapper);
 
-    ReceiveInfo sendInfo2ReceiveInfo = _sendInfo2ReceiveInfo(sendInfo);
+    MessageInfo sendInfo2ReceiveInfo = _sendInfo2ReceiveInfo(sendInfo);
 
     _globalValueController.messageMapListAdd(conversation!.conversationId!, sendInfo2ReceiveInfo);
 
@@ -119,12 +118,13 @@ class ChatController extends GetxController {
   }
 
 
-  ReceiveInfo _sendInfo2ReceiveInfo(SendInfo sendInfo) {
-    return ReceiveInfo(
+  MessageInfo _sendInfo2ReceiveInfo(MessageInfo sendInfo) {
+    return MessageInfo(
         cmd: sendInfo.cmd,
         sender: sendInfo.sender,
-        receiver: sendInfo.receivers[0],
-        dateTime: DateTime.now().toIso8601String(),
+        receivers: sendInfo.receivers,
+        serviceName: sendInfo.serviceName,
+        messageTime: sendInfo.messageTime,
         data: sendInfo.data);
   }
 }

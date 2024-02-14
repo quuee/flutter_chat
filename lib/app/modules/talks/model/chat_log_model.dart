@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter_chat/app/model/cmd_type.dart';
-import 'package:flutter_chat/app/model/receive_info.dart';
-import 'package:flutter_chat/app/model/user_info.dart';
+import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/user_info.dart';
 import 'package:isar/isar.dart';
 
 part 'chat_log_model.g.dart';
@@ -63,32 +63,32 @@ class ChatLogModel {
       };
 
   static ChatLogModel convertFromReceiveInfo(
-          ReceiveInfo receiveInfo, int currentUserId, int conversationId) =>
+          MessageInfo receiveInfo, int currentUserId, int conversationId) =>
       ChatLogModel(
         conversationId: conversationId,
         cmd: receiveInfo.cmd,
         currentUserId: currentUserId,
         senderId: receiveInfo.sender.userId,
         message: receiveInfo.data,
-        messageTime: receiveInfo.dateTime,
+        messageTime: receiveInfo.messageTime,
       );
 
-  static ReceiveInfo
+  static MessageInfo
       convertToReceiveInfo(ChatLogModel chatLogModel) =>
-          ReceiveInfo(
+      MessageInfo(
               cmd: chatLogModel.cmd,
               sender: UserInfo(
                   userId: chatLogModel.senderId == chatLogModel.currentUserId
                       ? chatLogModel.currentUserId
                       : chatLogModel.senderId,
                   terminal: TerminalType.APP),
-              receiver:
-                  UserInfo(
+              receivers:
+                  [UserInfo(
                       userId:
                           chatLogModel.senderId == chatLogModel.currentUserId
                               ? chatLogModel.senderId
                               : chatLogModel.currentUserId,
-                      terminal: TerminalType.APP),
-              dateTime: chatLogModel.messageTime,
-              data: chatLogModel.message);
+                      terminal: TerminalType.APP)],
+              messageTime: chatLogModel.messageTime,
+              data: chatLogModel.message, serviceName: '');
 }

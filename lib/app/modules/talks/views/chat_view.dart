@@ -1,12 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/core/date_util.dart';
 import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
-import 'package:flutter_chat/app/model/receive_info.dart';
 import 'package:flutter_chat/app/modules/talks/controllers/chat_controller.dart';
+import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:get/get.dart';
 
 /// 进入聊天界面
@@ -17,8 +17,10 @@ class ChatView extends GetView<ChatController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        appBarTitleText: controller.conversation?.conversationName??'',
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz))],
+        appBarTitleText: controller.conversation?.conversationName ?? '',
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz))
+        ],
       ),
       resizeToAvoidBottomInset: true, //默认是 true
       backgroundColor: AppColors.pageBackground,
@@ -36,7 +38,11 @@ class ChatView extends GetView<ChatController> {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: AppValues.padding),
-                child: Obx(() => controller.messageMapListG[controller.conversation?.conversationId] != null? _buildChatList():const SizedBox.shrink()),
+                child: Obx(() => controller.messageMapListG[
+                controller.conversation?.conversationId] !=
+                    null
+                    ? _buildChatList()
+                    : const SizedBox.shrink()),
               ),
             )),
 
@@ -133,11 +139,16 @@ class ChatView extends GetView<ChatController> {
     //   },
     // ),
     return ListView.builder(
+      reverse: true,
         controller: controller.scrollController,
-        itemCount: controller.messageMapListG[controller.conversation?.conversationId]?.length??0,
+        itemCount: controller
+                .messageMapListG[controller.conversation?.conversationId]
+                ?.length ??
+            0,
         // shrinkWrap: true,
         itemBuilder: (c, i) {
-          ReceiveInfo receiveInfo = controller.messageMapListG[controller.conversation?.conversationId]![i];
+          MessageInfo receiveInfo = controller
+              .messageMapListG[controller.conversation?.conversationId]!.reversed.elementAt(i);
           MainAxisAlignment layout =
               receiveInfo.sender.userId != controller.currentUser?.userId
                   ? MainAxisAlignment.start
@@ -145,15 +156,50 @@ class ChatView extends GetView<ChatController> {
 
           return Column(
             children: [
+              _buildMergeTime(i),
               Row(
                 mainAxisAlignment: layout,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // CachedNetworkImage(imageUrl: receiveInfo.)
-                  Text(receiveInfo.data)],
+                  // CachedNetworkImage(imageUrl: receiveInfo.sender.userId)
+                  Text(receiveInfo.data)
+                ],
               ),
             ],
           );
         });
+  }
+
+  _buildMergeTime(int index) {
+    // 短时间内的消息合并为一个时间
+    if (index != 0) {
+      var time1 = (DateTime.parse(controller
+          .messageMapListG[
+      controller.conversation?.conversationId]!.elementAt(index).messageTime)
+          .millisecondsSinceEpoch ~/
+          1000);
+      var time2 = (DateTime.parse(controller
+          .messageMapListG[
+      controller.conversation?.conversationId]!.elementAt(index-1).messageTime)
+          .millisecondsSinceEpoch ~/
+          1000);
+      var timeDiff = time1 - time2 ;
+      if (timeDiff < 10 * 30) {
+        return const SizedBox();
+      }
+
+      String timeNew = controller
+          .messageMapListG[
+      controller.conversation?.conversationId]![index].messageTime;
+      return Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(0x44, 0x66, 0x66, 0x66),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        child: Text(DateUtil.formatTime(timeNew) ?? ""),
+      );
+    }
+    return const SizedBox();
   }
 }

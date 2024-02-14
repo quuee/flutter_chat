@@ -1,7 +1,6 @@
 
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '/app/core/model/page_state.dart';
 import '/flavors/build_config.dart';

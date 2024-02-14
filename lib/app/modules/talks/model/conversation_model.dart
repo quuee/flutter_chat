@@ -2,8 +2,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter_chat/app/model/receive_info.dart';
-import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 
 part 'conversation_model.g.dart';
