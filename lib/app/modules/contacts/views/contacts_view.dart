@@ -12,6 +12,8 @@ class ContactsView extends BaseView<ContactsController> {
   static const double contactsHeight = 48;
   static const double contactsNavigateHeight = contactsHeight / 2;
 
+
+
   @override
   PreferredSizeWidget? appBar(BuildContext context) {
     return CustomAppBar(

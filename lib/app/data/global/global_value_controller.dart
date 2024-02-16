@@ -69,6 +69,7 @@ class GlobalValueController extends GetxController {
           conversationList.refresh();
           // _globalValueController.messageMapList.refresh();
         }, onError: (error) {
+          // webSocketProvider.getCurrentStatus()
           Fluttertoast.showToast(msg: error.toString());
         });
         webSocketProvider.startHeartBeat();
@@ -136,7 +137,7 @@ class GlobalValueController extends GetxController {
     List<ChatLogModel> chats = _isar.chatLogModels
         .filter()
         .conversationIdEqualTo(conversationId)
-    .limit(50)
+    .limit(30)
         .findAllSync();
     List<MessageInfo> temp =
         chats.map((e) => ChatLogModel.convertToReceiveInfo(e)).toList();

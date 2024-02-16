@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/modules/contacts/views/contacts_view.dart';
 import 'package:flutter_chat/app/modules/explore/views/explore_view.dart';
 import 'package:flutter_chat/app/modules/me/views/me_view.dart';
@@ -12,17 +12,15 @@ import '/app/core/base/base_view.dart';
 import 'bottom_nav_bar.dart';
 
 class MainView extends BaseView<MainController> {
-
   @override
   PreferredSizeWidget? appBar(BuildContext context) => null;
 
   @override
   Widget body(BuildContext context) {
+    // TODO 类似微信 连接断开提示 可手动重连
     return Container(
       key: UniqueKey(),
-      child: Obx(
-            () => getPageOnSelectedMenu(controller.selectedMenuCode),
-      ),
+      child: Obx(() => getPageOnSelectedMenu(controller.selectedMenuCode)),
     );
   }
 

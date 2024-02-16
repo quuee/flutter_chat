@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/date_util.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/paging_view.dart';
+import 'package:flutter_chat/app/core/widget/popup_window.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:flutter_chat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ import '/app/core/base/base_view.dart';
 
 /// 会话界面
 class ConversationView extends BaseView<ConversationController> {
+
   @override
   PreferredSizeWidget? appBar(BuildContext context) {
     return CustomAppBar(
@@ -43,42 +45,59 @@ class ConversationView extends BaseView<ConversationController> {
   }
 
   _buildConversationItem(ConversationModel conversation) {
-    return Dismissible(
-      key: Key(conversation.conversationId.toString()),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: Colors.redAccent,
-        alignment: Alignment.centerRight,
-        child: const Icon(Icons.delete),
-      ),
+    // Slidable 插件功能更丰富
+    // return Dismissible(
+    //   key: Key(conversation.conversationId.toString()),
+    //   direction: DismissDirection.endToStart,
+    //   background: Container(
+    //     color: Colors.redAccent,
+    //     alignment: Alignment.centerRight,
+    //     child: const Icon(Icons.delete),
+    //   ),
+    //   child: SizedBox(
+    //     height: AppValues.iconLargeSize * 2,
+    //     child: ListTile(
+    //       leading: CachedNetworkImage(
+    //           width: AppValues.iconLargeSize * 2,
+    //           height: AppValues.iconLargeSize * 2,
+    //           imageUrl: conversation.avatarUrl),
+    //       title: Text(conversation.conversationName),
+    //       subtitle: Text(conversation.lastMessage ?? '',maxLines: 1,overflow: TextOverflow.ellipsis,),
+    //       trailing: Text(DateUtil.formatTime(conversation.lastTime) ?? ''),
+    //       onTap: (){
+    //         Get.toNamed(Routes.TOCHAT, arguments: conversation);
+    //       },
+    //       onLongPress: (){},
+    //     )
+    //   ),
+    //   onDismissed: (direction) {
+    //     controller.deleteConversation(conversation.conversationId!);
+    //   },
+    // );
+
+    return GestureDetector(
       child: SizedBox(
-        height: AppValues.iconLargeSize * 2,
-        child: InkWell(
-          child: Row(
-            children: [
-              CachedNetworkImage(
-                  width: AppValues.iconLargeSize * 2,
-                  height: AppValues.iconLargeSize * 2,
-                  imageUrl: conversation.avatarUrl),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(conversation.conversationName),
-                  Text(conversation.lastMessage ?? '',maxLines: 1,overflow: TextOverflow.ellipsis,),
-                ],
-              ),
-              Spacer(),
-              Text(DateUtil.formatTime(conversation.lastTime) ?? ''),
-            ],
-          ),
-          onTap: () {
-            Get.toNamed(Routes.TOCHAT, arguments: conversation);
-          },
-        ),
+          height: AppValues.iconLargeSize * 2,
+          child: ListTile(
+            leading: CachedNetworkImage(
+                width: AppValues.iconLargeSize * 2,
+                height: AppValues.iconLargeSize * 2,
+                imageUrl: conversation.avatarUrl),
+            title: Text(conversation.conversationName),
+            subtitle: Text(conversation.lastMessage ?? '',maxLines: 1,overflow: TextOverflow.ellipsis,),
+            trailing: Text(DateUtil.formatTime(conversation.lastTime) ?? ''),
+            onTap: (){
+              Get.toNamed(Routes.TOCHAT, arguments: conversation);
+            },
+          )
       ),
-      onDismissed: (direction) {
-        controller.deleteConversation(conversation.conversationId!);
+      onLongPressStart: (LongPressStartDetails details){
+        logger.d('details.globalPosition: ${details.globalPosition.dx},${details.globalPosition.dy}');
+        PopupWindow.create(key: globalKey,dx: details.globalPosition.dx,dy:details.globalPosition.dy);
+
       },
     );
+
   }
+
 }

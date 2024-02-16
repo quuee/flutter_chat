@@ -140,6 +140,7 @@ class WebSocketProvider {
         logger.i("The reconnection attempts have exceeded the maximum limit.");
         _reconnectTimer?.cancel();
         _reconnectTimer = null;
+        _connectStatus = ConnectStatusEnum.close;
       }
       return;
     }
