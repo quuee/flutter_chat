@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat/app/core/date_util.dart';
 import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
@@ -39,8 +39,8 @@ class ChatView extends GetView<ChatController> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: AppValues.padding),
                 child: Obx(() => controller.messageMapListG[
-                controller.conversation?.conversationId] !=
-                    null
+                            controller.conversation?.conversationId] !=
+                        null
                     ? _buildChatList()
                     : const SizedBox.shrink()),
               ),
@@ -49,11 +49,7 @@ class ChatView extends GetView<ChatController> {
             //keyboard
             Row(
               children: [
-                IconButton(
-                    onPressed: () {},
-                    icon: const AssetImageView(
-                      fileName: 'ic_keyboard.svg',
-                    )),
+                _buildChangeKeyboardOrSpeakBtn(),
                 Flexible(
                   child: Container(
                     alignment: Alignment.center,
@@ -64,6 +60,7 @@ class ChatView extends GetView<ChatController> {
                     ),
                     child: TextField(
                       controller: controller.textEditingController,
+                      // focusNode: controller.textFocusNode,
                       maxLines: 4,
                       minLines: 1,
                       keyboardType: TextInputType.multiline,
@@ -84,7 +81,33 @@ class ChatView extends GetView<ChatController> {
                 ),
                 _buildSendOrAddButton(),
               ],
-            )
+            ),
+
+            // 隐藏的工具栏
+            Obx(() => Offstage(
+              offstage: controller.toolBtnShow.value, // true隐藏
+              child: SizedBox(
+                height: 200,
+                child: GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    childAspectRatio: 1
+                  ),
+                  children: [
+                    Icon(Icons.add),
+                    Icon(Icons.phone),
+                    Icon(Icons.photo),
+                    Icon(Icons.voice_chat),
+                    Icon(Icons.map),
+                    Icon(Icons.file_copy),
+                    Icon(Icons.attach_money),
+                    Icon(Icons.expand_more),
+                  ],
+                ),
+              ),
+            ))
+
           ],
         ),
       )),
@@ -92,16 +115,29 @@ class ChatView extends GetView<ChatController> {
   }
 
   _buildSendOrAddButton() {
-    return Obx(() => controller.sendMessageStr.value.isNotEmpty
-        ? IconButton(
-            onPressed: () {
-              controller.sendMessage();
-            },
-            icon: const Icon(
-              Icons.send,
-              color: AppColors.colorLightGreen,
-            ))
-        : IconButton(onPressed: () {}, icon: const Icon(Icons.add)));
+    var sendButton = IconButton(
+        onPressed: () {
+          controller.sendMessage();
+        },
+        icon: const Icon(
+          Icons.send,
+          color: AppColors.colorLightGreen,
+        ));
+    var toolButton = IconButton(onPressed: () {
+      if(!controller.keyboardShow.value && controller.toolBtnShow.value){
+        controller.toolBtnShow.value = false;
+      }else if(controller.keyboardShow.value){
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        controller.keyboardShow.value = false;
+        controller.toolBtnShow.value = false;
+      }else{
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+        controller.keyboardShow.value = true;
+        controller.toolBtnShow.value = true;
+      }
+    }, icon: const Icon(Icons.add));
+    return Obx(() =>
+        controller.sendMessageStr.value.isNotEmpty ? sendButton : toolButton);
   }
 
   _buildChatList() {
@@ -139,7 +175,7 @@ class ChatView extends GetView<ChatController> {
     //   },
     // ),
     return ListView.builder(
-      reverse: true,
+        reverse: true,
         controller: controller.scrollController,
         itemCount: controller
                 .messageMapListG[controller.conversation?.conversationId]
@@ -148,7 +184,9 @@ class ChatView extends GetView<ChatController> {
         // shrinkWrap: true,
         itemBuilder: (c, i) {
           MessageInfo receiveInfo = controller
-              .messageMapListG[controller.conversation?.conversationId]!.reversed.elementAt(i);
+              .messageMapListG[controller.conversation?.conversationId]!
+              .reversed
+              .elementAt(i);
           MainAxisAlignment layout =
               receiveInfo.sender.userId != controller.currentUser?.userId
                   ? MainAxisAlignment.start
@@ -174,23 +212,25 @@ class ChatView extends GetView<ChatController> {
     // 短时间内的消息合并为一个时间
     if (index != 0) {
       var time1 = (DateTime.parse(controller
-          .messageMapListG[
-      controller.conversation?.conversationId]!.elementAt(index).messageTime)
-          .millisecondsSinceEpoch ~/
+                  .messageMapListG[controller.conversation?.conversationId]!
+                  .elementAt(index)
+                  .messageTime)
+              .millisecondsSinceEpoch ~/
           1000);
       var time2 = (DateTime.parse(controller
-          .messageMapListG[
-      controller.conversation?.conversationId]!.elementAt(index-1).messageTime)
-          .millisecondsSinceEpoch ~/
+                  .messageMapListG[controller.conversation?.conversationId]!
+                  .elementAt(index - 1)
+                  .messageTime)
+              .millisecondsSinceEpoch ~/
           1000);
-      var timeDiff = time1 - time2 ;
+      var timeDiff = time1 - time2;
       if (timeDiff < 10 * 30) {
         return const SizedBox();
       }
 
       String timeNew = controller
-          .messageMapListG[
-      controller.conversation?.conversationId]![index].messageTime;
+          .messageMapListG[controller.conversation?.conversationId]![index]
+          .messageTime;
       return Container(
         decoration: BoxDecoration(
           color: const Color.fromARGB(0x44, 0x66, 0x66, 0x66),
@@ -202,4 +242,29 @@ class ChatView extends GetView<ChatController> {
     }
     return const SizedBox();
   }
+
+  _buildChangeKeyboardOrSpeakBtn() {
+    return Obx(() => IconButton(
+        onPressed: () {
+          if (!controller.keyboardShow.value) {
+            // 控制键盘弹起
+            controller.keyboardShow.value = true;
+            controller.toolBtnShow.value = true;
+            SystemChannels.textInput.invokeMethod('TextInput.show');
+          } else {
+            controller.keyboardShow.value = false;
+            controller.toolBtnShow.value = true;
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+          }
+          controller.leftKeyboardButton.value =
+              !controller.leftKeyboardButton.value;
+        },
+        icon: AssetImageView(
+          fileName: controller.leftKeyboardButton.value
+              ? 'ic_keyboard.svg'
+              : 'ic_voice.svg',
+        )));
+  }
+
+
 }

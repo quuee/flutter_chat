@@ -35,6 +35,12 @@ class ChatController extends GetxController {
   RxMap<int, RxList<MessageInfo>> get messageMapListG =>
       _globalValueController.messageMapList;
 
+  RxBool leftKeyboardButton = true.obs;
+
+  RxBool keyboardShow = false.obs;
+
+  RxBool toolBtnShow = true.obs;
+
   @override
   void onInit() {
     // _messageListen();
