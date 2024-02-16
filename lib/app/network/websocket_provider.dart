@@ -10,7 +10,7 @@ import '/flavors/build_config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
-import 'model/cmd_type.dart';
+import 'model/conversation_type.dart';
 
 
 enum ConnectStatusEnum { connect, connecting, close, closing }
@@ -231,7 +231,7 @@ class WebSocketProvider {
   void startHeartBeat() {
     destroyHeartBeat();
     _heartBeat = Timer.periodic(Duration(seconds: _heartTimes), (timer) {
-      var message = MessageWrapper(cmd: CmdType.HEART_BEAT,data: {"msg":"心跳"});
+      var message = MessageWrapper(conversationType: ConversationType.HEART_BEAT,data: {"msg":"心跳"});
       logger.i('sentHeart: ${message.toJsonString()}');
       sendMsg(message);
     });

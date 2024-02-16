@@ -6,7 +6,7 @@ import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
-import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/conversation_type.dart';
 import 'package:flutter_chat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
@@ -138,7 +138,7 @@ class ContactSimple extends StatelessWidget {
             onTap: () {
               var conversation = ConversationModel(
                 conversationName: contact.nickname,
-                cmd: CmdType.PRIVATE_MESSAGE,
+                conversationType: ConversationType.PRIVATE_MESSAGE,
                 contactUserIds: [contact.userId],
                 avatarUrl: contact.avatarUrl,);
               Get.toNamed(Routes.TOCHAT,arguments: conversation);

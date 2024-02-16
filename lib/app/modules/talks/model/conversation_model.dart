@@ -18,14 +18,16 @@ class ConversationModel {
   Id? conversationId;
   @Name('conversationName')
   String conversationName; // 群聊名 或 联系人名
-  @Name('cmd')
-  int cmd;
+  @Name('conversationType')
+  int conversationType;
   @Name('contactUserId')
   List<int> contactUserIds; // 只要sender不是本人发的都是联系人
   @Name('currentUserId')
   int? currentUserId;
   @Name('avatarUrl')
   String avatarUrl;
+  @Name('contentType')
+  int? contentType;
   @Name('lastTime')
   String? lastTime;
   @Name('lastMessage')
@@ -37,37 +39,37 @@ class ConversationModel {
   ConversationModel({
     this.conversationId,
     required this.conversationName,
-    required this.cmd,
+    required this.conversationType,
     required this.contactUserIds,
     this.currentUserId,
     required this.avatarUrl,
+    this.contentType,
     this.lastTime,
     this.lastMessage,
-    // this.messageList,
   });
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) => ConversationModel(
     conversationId: json["conversationId"],
     conversationName: json["conversationName"],
-    cmd: json["cmd"],
+    conversationType: json["conversationType"],
     contactUserIds: json["contactUserIds"],
     currentUserId: json["currentUserId"],
 
     avatarUrl: json["avatarUrl"],
+    contentType: json["contentType"],
     lastTime: json["lastTime"],
     lastMessage: json["lastMessage"],
-    // messageList: json["messageList"],
   );
 
   Map<String, dynamic> toJson() => {
     "conversationId": conversationId,
     "conversationName": conversationName,
-    "cmd": cmd,
+    "conversationType": conversationType,
     "contactUserIds": contactUserIds,
     "currentUserId": currentUserId,
     "avatarUrl": avatarUrl,
+    "contentType": contentType,
     "lastTime": lastTime,
     "lastMessage": lastMessage,
-    // "messageList": messageList,
   };
 }

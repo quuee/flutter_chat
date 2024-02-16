@@ -6,8 +6,10 @@ import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
 import 'package:flutter_chat/app/modules/talks/controllers/chat_controller.dart';
+import 'package:flutter_chat/app/modules/talks/widget/chat_item.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// 进入聊天界面
 class ChatView extends GetView<ChatController> {
@@ -97,8 +99,16 @@ class ChatView extends GetView<ChatController> {
                   children: [
                     Icon(Icons.add),
                     Icon(Icons.phone),
-                    Icon(Icons.photo),
                     Icon(Icons.voice_chat),
+                    IconButton(onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+                      // Pick multiple images and videos.
+                      final List<XFile> medias = await picker.pickMultipleMedia();
+                      for (XFile f in medias) {
+                        String mimeType = f.mimeType??'';
+                        String path = f.path??'';
+                      }},
+                      icon: Icon(Icons.photo),),
                     Icon(Icons.map),
                     Icon(Icons.file_copy),
                     Icon(Icons.attach_money),
@@ -187,22 +197,15 @@ class ChatView extends GetView<ChatController> {
               .messageMapListG[controller.conversation?.conversationId]!
               .reversed
               .elementAt(i);
-          MainAxisAlignment layout =
-              receiveInfo.sender.userId != controller.currentUser?.userId
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.end;
-
+          // MainAxisAlignment layout =
+          //     receiveInfo.sender.userId != controller.currentUser?.userId
+          //         ? MainAxisAlignment.start
+          //         : MainAxisAlignment.end;
+          bool isFromMsg = receiveInfo.sender.userId != controller.currentUser?.userId;
           return Column(
             children: [
               _buildMergeTime(i),
-              Row(
-                mainAxisAlignment: layout,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // CachedNetworkImage(imageUrl: receiveInfo.sender.userId)
-                  Text(receiveInfo.data)
-                ],
-              ),
+              ChatItem(isFromMsg: isFromMsg,messageInfo: receiveInfo,)
             ],
           );
         });
@@ -214,13 +217,13 @@ class ChatView extends GetView<ChatController> {
       var time1 = (DateTime.parse(controller
                   .messageMapListG[controller.conversation?.conversationId]!
                   .elementAt(index)
-                  .messageTime)
+                  .contentTime)
               .millisecondsSinceEpoch ~/
           1000);
       var time2 = (DateTime.parse(controller
                   .messageMapListG[controller.conversation?.conversationId]!
                   .elementAt(index - 1)
-                  .messageTime)
+                  .contentTime)
               .millisecondsSinceEpoch ~/
           1000);
       var timeDiff = time1 - time2;
@@ -230,7 +233,7 @@ class ChatView extends GetView<ChatController> {
 
       String timeNew = controller
           .messageMapListG[controller.conversation?.conversationId]![index]
-          .messageTime;
+          .contentTime;
       return Container(
         decoration: BoxDecoration(
           color: const Color.fromARGB(0x44, 0x66, 0x66, 0x66),

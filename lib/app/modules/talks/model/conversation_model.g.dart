@@ -22,33 +22,38 @@ const ConversationModelSchema = CollectionSchema(
       name: r'avatarUrl',
       type: IsarType.string,
     ),
-    r'cmd': PropertySchema(
-      id: 1,
-      name: r'cmd',
-      type: IsarType.long,
-    ),
     r'contactUserId': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'contactUserId',
       type: IsarType.longList,
+    ),
+    r'contentType': PropertySchema(
+      id: 2,
+      name: r'contentType',
+      type: IsarType.long,
     ),
     r'conversationName': PropertySchema(
       id: 3,
       name: r'conversationName',
       type: IsarType.string,
     ),
-    r'currentUserId': PropertySchema(
+    r'conversationType': PropertySchema(
       id: 4,
+      name: r'conversationType',
+      type: IsarType.long,
+    ),
+    r'currentUserId': PropertySchema(
+      id: 5,
       name: r'currentUserId',
       type: IsarType.long,
     ),
     r'lastMessage': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'lastMessage',
       type: IsarType.string,
     ),
     r'lastTime': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'lastTime',
       type: IsarType.string,
     )
@@ -98,12 +103,13 @@ void _conversationModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.avatarUrl);
-  writer.writeLong(offsets[1], object.cmd);
-  writer.writeLongList(offsets[2], object.contactUserIds);
+  writer.writeLongList(offsets[1], object.contactUserIds);
+  writer.writeLong(offsets[2], object.contentType);
   writer.writeString(offsets[3], object.conversationName);
-  writer.writeLong(offsets[4], object.currentUserId);
-  writer.writeString(offsets[5], object.lastMessage);
-  writer.writeString(offsets[6], object.lastTime);
+  writer.writeLong(offsets[4], object.conversationType);
+  writer.writeLong(offsets[5], object.currentUserId);
+  writer.writeString(offsets[6], object.lastMessage);
+  writer.writeString(offsets[7], object.lastTime);
 }
 
 ConversationModel _conversationModelDeserialize(
@@ -114,13 +120,14 @@ ConversationModel _conversationModelDeserialize(
 ) {
   final object = ConversationModel(
     avatarUrl: reader.readString(offsets[0]),
-    cmd: reader.readLong(offsets[1]),
-    contactUserIds: reader.readLongList(offsets[2]) ?? [],
+    contactUserIds: reader.readLongList(offsets[1]) ?? [],
+    contentType: reader.readLongOrNull(offsets[2]),
     conversationId: id,
     conversationName: reader.readString(offsets[3]),
-    currentUserId: reader.readLongOrNull(offsets[4]),
-    lastMessage: reader.readStringOrNull(offsets[5]),
-    lastTime: reader.readStringOrNull(offsets[6]),
+    conversationType: reader.readLong(offsets[4]),
+    currentUserId: reader.readLongOrNull(offsets[5]),
+    lastMessage: reader.readStringOrNull(offsets[6]),
+    lastTime: reader.readStringOrNull(offsets[7]),
   );
   return object;
 }
@@ -135,16 +142,18 @@ P _conversationModelDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
-    case 2:
       return (reader.readLongList(offset) ?? []) as P;
+    case 2:
+      return (reader.readLongOrNull(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -389,62 +398,6 @@ extension ConversationModelQueryFilter
   }
 
   QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
-      cmdEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cmd',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
-      cmdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'cmd',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
-      cmdLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'cmd',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
-      cmdBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'cmd',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
       contactUserIdsElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -586,6 +539,80 @@ extension ConversationModelQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'contentType',
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'contentType',
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'contentType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'contentType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'contentType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      contentTypeBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'contentType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
@@ -795,6 +822,62 @@ extension ConversationModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'conversationName',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      conversationTypeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      conversationTypeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      conversationTypeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterFilterCondition>
+      conversationTypeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'conversationType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1204,16 +1287,17 @@ extension ConversationModelQuerySortBy
     });
   }
 
-  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy> sortByCmd() {
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      sortByContentType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.asc);
+      return query.addSortBy(r'contentType', Sort.asc);
     });
   }
 
   QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
-      sortByCmdDesc() {
+      sortByContentTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.desc);
+      return query.addSortBy(r'contentType', Sort.desc);
     });
   }
 
@@ -1228,6 +1312,20 @@ extension ConversationModelQuerySortBy
       sortByConversationNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'conversationName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      sortByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      sortByConversationTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.desc);
     });
   }
 
@@ -1290,16 +1388,17 @@ extension ConversationModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy> thenByCmd() {
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      thenByContentType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.asc);
+      return query.addSortBy(r'contentType', Sort.asc);
     });
   }
 
   QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
-      thenByCmdDesc() {
+      thenByContentTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.desc);
+      return query.addSortBy(r'contentType', Sort.desc);
     });
   }
 
@@ -1328,6 +1427,20 @@ extension ConversationModelQuerySortThenBy
       thenByConversationNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'conversationName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      thenByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QAfterSortBy>
+      thenByConversationTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.desc);
     });
   }
 
@@ -1384,16 +1497,16 @@ extension ConversationModelQueryWhereDistinct
   }
 
   QueryBuilder<ConversationModel, ConversationModel, QDistinct>
-      distinctByCmd() {
+      distinctByContactUserIds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'cmd');
+      return query.addDistinctBy(r'contactUserId');
     });
   }
 
   QueryBuilder<ConversationModel, ConversationModel, QDistinct>
-      distinctByContactUserIds() {
+      distinctByContentType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'contactUserId');
+      return query.addDistinctBy(r'contentType');
     });
   }
 
@@ -1402,6 +1515,13 @@ extension ConversationModelQueryWhereDistinct
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'conversationName',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ConversationModel, ConversationModel, QDistinct>
+      distinctByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'conversationType');
     });
   }
 
@@ -1443,12 +1563,6 @@ extension ConversationModelQueryProperty
     });
   }
 
-  QueryBuilder<ConversationModel, int, QQueryOperations> cmdProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'cmd');
-    });
-  }
-
   QueryBuilder<ConversationModel, List<int>, QQueryOperations>
       contactUserIdsProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -1456,10 +1570,24 @@ extension ConversationModelQueryProperty
     });
   }
 
+  QueryBuilder<ConversationModel, int?, QQueryOperations>
+      contentTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'contentType');
+    });
+  }
+
   QueryBuilder<ConversationModel, String, QQueryOperations>
       conversationNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'conversationName');
+    });
+  }
+
+  QueryBuilder<ConversationModel, int, QQueryOperations>
+      conversationTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'conversationType');
     });
   }
 

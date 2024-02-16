@@ -17,35 +17,50 @@ const ChatLogModelSchema = CollectionSchema(
   name: r'ChatLogModel',
   id: -8378373002482223657,
   properties: {
-    r'cmd': PropertySchema(
+    r'content': PropertySchema(
       id: 0,
-      name: r'cmd',
+      name: r'content',
+      type: IsarType.string,
+    ),
+    r'contentTime': PropertySchema(
+      id: 1,
+      name: r'contentTime',
+      type: IsarType.string,
+    ),
+    r'contentType': PropertySchema(
+      id: 2,
+      name: r'contentType',
       type: IsarType.long,
     ),
     r'conversationId': PropertySchema(
-      id: 1,
+      id: 3,
       name: r'conversationId',
       type: IsarType.long,
     ),
+    r'conversationType': PropertySchema(
+      id: 4,
+      name: r'conversationType',
+      type: IsarType.long,
+    ),
     r'currentUserId': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'currentUserId',
       type: IsarType.long,
     ),
-    r'message': PropertySchema(
-      id: 3,
-      name: r'message',
-      type: IsarType.string,
-    ),
-    r'messageTime': PropertySchema(
-      id: 4,
-      name: r'messageTime',
+    r'imagePath': PropertySchema(
+      id: 6,
+      name: r'imagePath',
       type: IsarType.string,
     ),
     r'senderId': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'senderId',
       type: IsarType.long,
+    ),
+    r'soundPath': PropertySchema(
+      id: 8,
+      name: r'soundPath',
+      type: IsarType.string,
     )
   },
   estimateSize: _chatLogModelEstimateSize,
@@ -68,8 +83,20 @@ int _chatLogModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.message.length * 3;
-  bytesCount += 3 + object.messageTime.length * 3;
+  bytesCount += 3 + object.content.length * 3;
+  bytesCount += 3 + object.contentTime.length * 3;
+  {
+    final value = object.imagePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.soundPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -79,12 +106,15 @@ void _chatLogModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.cmd);
-  writer.writeLong(offsets[1], object.conversationId);
-  writer.writeLong(offsets[2], object.currentUserId);
-  writer.writeString(offsets[3], object.message);
-  writer.writeString(offsets[4], object.messageTime);
-  writer.writeLong(offsets[5], object.senderId);
+  writer.writeString(offsets[0], object.content);
+  writer.writeString(offsets[1], object.contentTime);
+  writer.writeLong(offsets[2], object.contentType);
+  writer.writeLong(offsets[3], object.conversationId);
+  writer.writeLong(offsets[4], object.conversationType);
+  writer.writeLong(offsets[5], object.currentUserId);
+  writer.writeString(offsets[6], object.imagePath);
+  writer.writeLong(offsets[7], object.senderId);
+  writer.writeString(offsets[8], object.soundPath);
 }
 
 ChatLogModel _chatLogModelDeserialize(
@@ -94,13 +124,16 @@ ChatLogModel _chatLogModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = ChatLogModel(
-    cmd: reader.readLong(offsets[0]),
-    conversationId: reader.readLong(offsets[1]),
-    currentUserId: reader.readLong(offsets[2]),
+    content: reader.readString(offsets[0]),
+    contentTime: reader.readString(offsets[1]),
+    contentType: reader.readLong(offsets[2]),
+    conversationId: reader.readLong(offsets[3]),
+    conversationType: reader.readLong(offsets[4]),
+    currentUserId: reader.readLong(offsets[5]),
+    imagePath: reader.readStringOrNull(offsets[6]),
     logId: id,
-    message: reader.readString(offsets[3]),
-    messageTime: reader.readString(offsets[4]),
-    senderId: reader.readLong(offsets[5]),
+    senderId: reader.readLong(offsets[7]),
+    soundPath: reader.readStringOrNull(offsets[8]),
   );
   return object;
 }
@@ -113,17 +146,23 @@ P _chatLogModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
       return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 5:
       return (reader.readLong(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readLong(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -225,44 +264,318 @@ extension ChatLogModelQueryWhere
 
 extension ChatLogModelQueryFilter
     on QueryBuilder<ChatLogModel, ChatLogModel, QFilterCondition> {
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition> cmdEqualTo(
-      int value) {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cmd',
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'content',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'content',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'content',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'content',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'content',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'contentTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'contentTime',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'contentTime',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'contentTime',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTimeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'contentTime',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTypeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'contentType',
         value: value,
       ));
     });
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      cmdGreaterThan(
+      contentTypeGreaterThan(
     int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'cmd',
+        property: r'contentType',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition> cmdLessThan(
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTypeLessThan(
     int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'cmd',
+        property: r'contentType',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition> cmdBetween(
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      contentTypeBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -270,7 +583,7 @@ extension ChatLogModelQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'cmd',
+        property: r'contentType',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -336,6 +649,62 @@ extension ChatLogModelQueryFilter
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      conversationTypeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      conversationTypeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      conversationTypeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'conversationType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      conversationTypeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'conversationType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
       currentUserIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -387,6 +756,160 @@ extension ChatLogModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'imagePath',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'imagePath',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'imagePath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'imagePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'imagePath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imagePath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      imagePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'imagePath',
+        value: '',
       ));
     });
   }
@@ -464,278 +987,6 @@ extension ChatLogModelQueryFilter
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'message',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'message',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'message',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'message',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'message',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'messageTime',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'messageTime',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'messageTime',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'messageTime',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      messageTimeIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'messageTime',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
       senderIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -790,6 +1041,160 @@ extension ChatLogModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'soundPath',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'soundPath',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'soundPath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'soundPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'soundPath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'soundPath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
+      soundPathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'soundPath',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension ChatLogModelQueryObject
@@ -800,15 +1205,41 @@ extension ChatLogModelQueryLinks
 
 extension ChatLogModelQuerySortBy
     on QueryBuilder<ChatLogModel, ChatLogModel, QSortBy> {
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByCmd() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByContent() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.asc);
+      return query.addSortBy(r'content', Sort.asc);
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByCmdDesc() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByContentDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.desc);
+      return query.addSortBy(r'content', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByContentTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      sortByContentTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentTime', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByContentType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      sortByContentTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentType', Sort.desc);
     });
   }
 
@@ -826,6 +1257,20 @@ extension ChatLogModelQuerySortBy
     });
   }
 
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      sortByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      sortByConversationTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.desc);
+    });
+  }
+
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByCurrentUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentUserId', Sort.asc);
@@ -839,28 +1284,15 @@ extension ChatLogModelQuerySortBy
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByMessage() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByImagePath() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'message', Sort.asc);
+      return query.addSortBy(r'imagePath', Sort.asc);
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByMessageDesc() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByImagePathDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'message', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByMessageTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'messageTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
-      sortByMessageTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'messageTime', Sort.desc);
+      return query.addSortBy(r'imagePath', Sort.desc);
     });
   }
 
@@ -875,19 +1307,57 @@ extension ChatLogModelQuerySortBy
       return query.addSortBy(r'senderId', Sort.desc);
     });
   }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySoundPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'soundPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySoundPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'soundPath', Sort.desc);
+    });
+  }
 }
 
 extension ChatLogModelQuerySortThenBy
     on QueryBuilder<ChatLogModel, ChatLogModel, QSortThenBy> {
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByCmd() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByContent() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.asc);
+      return query.addSortBy(r'content', Sort.asc);
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByCmdDesc() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByContentDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cmd', Sort.desc);
+      return query.addSortBy(r'content', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByContentTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      thenByContentTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentTime', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByContentType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      thenByContentTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentType', Sort.desc);
     });
   }
 
@@ -905,6 +1375,20 @@ extension ChatLogModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      thenByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
+      thenByConversationTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'conversationType', Sort.desc);
+    });
+  }
+
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByCurrentUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentUserId', Sort.asc);
@@ -915,6 +1399,18 @@ extension ChatLogModelQuerySortThenBy
       thenByCurrentUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentUserId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.desc);
     });
   }
 
@@ -930,31 +1426,6 @@ extension ChatLogModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByMessage() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'message', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByMessageDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'message', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByMessageTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'messageTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy>
-      thenByMessageTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'messageTime', Sort.desc);
-    });
-  }
-
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySenderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'senderId', Sort.asc);
@@ -966,13 +1437,39 @@ extension ChatLogModelQuerySortThenBy
       return query.addSortBy(r'senderId', Sort.desc);
     });
   }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySoundPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'soundPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySoundPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'soundPath', Sort.desc);
+    });
+  }
 }
 
 extension ChatLogModelQueryWhereDistinct
     on QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> {
-  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByCmd() {
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByContent(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'cmd');
+      return query.addDistinctBy(r'content', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByContentTime(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'contentTime', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByContentType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'contentType');
     });
   }
 
@@ -984,29 +1481,36 @@ extension ChatLogModelQueryWhereDistinct
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QDistinct>
+      distinctByConversationType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'conversationType');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct>
       distinctByCurrentUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentUserId');
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByMessage(
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByImagePath(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'message', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByMessageTime(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'messageTime', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'imagePath', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctBySenderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'senderId');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctBySoundPath(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'soundPath', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1019,9 +1523,21 @@ extension ChatLogModelQueryProperty
     });
   }
 
-  QueryBuilder<ChatLogModel, int, QQueryOperations> cmdProperty() {
+  QueryBuilder<ChatLogModel, String, QQueryOperations> contentProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'cmd');
+      return query.addPropertyName(r'content');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, String, QQueryOperations> contentTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'contentTime');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, int, QQueryOperations> contentTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'contentType');
     });
   }
 
@@ -1031,27 +1547,33 @@ extension ChatLogModelQueryProperty
     });
   }
 
+  QueryBuilder<ChatLogModel, int, QQueryOperations> conversationTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'conversationType');
+    });
+  }
+
   QueryBuilder<ChatLogModel, int, QQueryOperations> currentUserIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentUserId');
     });
   }
 
-  QueryBuilder<ChatLogModel, String, QQueryOperations> messageProperty() {
+  QueryBuilder<ChatLogModel, String?, QQueryOperations> imagePathProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'message');
-    });
-  }
-
-  QueryBuilder<ChatLogModel, String, QQueryOperations> messageTimeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'messageTime');
+      return query.addPropertyName(r'imagePath');
     });
   }
 
   QueryBuilder<ChatLogModel, int, QQueryOperations> senderIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'senderId');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, String?, QQueryOperations> soundPathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'soundPath');
     });
   }
 }

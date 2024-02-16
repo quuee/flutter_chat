@@ -4,7 +4,7 @@ import 'package:flutter_chat/app/data/local/preference/preference_manager.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/modules/talks/model/chat_log_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
-import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/conversation_type.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:flutter_chat/app/network/model/message_wrapper.dart';
 import 'package:flutter_chat/app/network/websocket_provider.dart';
@@ -46,20 +46,20 @@ class GlobalValueController extends GetxController {
         webSocketProvider.listen((msg) {
           // logger.i('Received: $msg');
           MessageWrapper data = MessageWrapper.fromJson(json.decode(msg));
-          if (data.cmd == CmdType.PRIVATE_MESSAGE) {
+          if (data.conversationType == ConversationType.PRIVATE_MESSAGE) {
             MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
             for (var conversation in conversationList) {
               if (conversation.contactUserIds.first ==
                   receiveInfo.sender.userId) {
 
-                conversation.lastMessage = receiveInfo.data;
+                conversation.lastMessage = receiveInfo.content;
 
                 messageMapList[conversation.conversationId]?.add(receiveInfo);
 
                 isarSaveMessage([receiveInfo],conversation.conversationId!);
               }
             }
-          } else if (data.cmd == CmdType.GROUP_MESSAGE) {}
+          } else if (data.conversationType == ConversationType.GROUP_MESSAGE) {}
 
           logger.i(
             '处理接收的消息${data.toJsonString()}',

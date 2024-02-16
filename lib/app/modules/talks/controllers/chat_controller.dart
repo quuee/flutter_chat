@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/id_util.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
-import 'package:flutter_chat/app/network/model/cmd_type.dart';
+import 'package:flutter_chat/app/network/model/conversation_type.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/message_type.dart';
 import 'package:flutter_chat/app/network/model/message_wrapper.dart';
 import 'package:flutter_chat/app/network/model/user_info.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
@@ -59,7 +60,8 @@ class ChatController extends GetxController {
     // 自己的最后一条信息，不能传递到会话界面（使会话界面总展示最新的消息）
     // 点进去不做任何操作退出来 没有一条信息
     if (messageMapListG[conversation?.conversationId]!.isNotEmpty) {
-      conversation?.lastMessage = messageMapListG[conversation?.conversationId]!.last.data;
+      conversation?.lastMessage =
+          messageMapListG[conversation?.conversationId]!.last.content;
       conversation?.lastTime = DateTime.now().toString();
       conversation?.currentUserId = currentUser!.userId;
 
@@ -95,7 +97,7 @@ class ChatController extends GetxController {
 
   Future<void> sendMessage() async {
     MessageInfo sendInfo = MessageInfo(
-        cmd: CmdType.PRIVATE_MESSAGE,
+        conversationType: ConversationType.PRIVATE_MESSAGE,
         sender: UserInfo(
             userId: _globalValueController.currentUser!.userId,
             terminal: TerminalType.APP),
@@ -105,32 +107,21 @@ class ChatController extends GetxController {
                 userId: conversation!.contactUserIds[index],
                 terminal: TerminalType.APP)),
         serviceName: '',
-        messageTime: DateTime.now().toString(),
-        data: sendMessageStr.value);
-    var messageWrapper =
-        MessageWrapper(cmd: CmdType.PRIVATE_MESSAGE, data: sendInfo);
+        contentTime: DateTime.now().toString(),
+        contentType: MessageType.text,
+        content: sendMessageStr.value);
+    var messageWrapper = MessageWrapper(
+        conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
 
     _globalValueController.sendMessage(messageWrapper);
 
-    MessageInfo sendInfo2ReceiveInfo = _sendInfo2ReceiveInfo(sendInfo);
+    _globalValueController.messageMapListAdd(
+        conversation!.conversationId!, sendInfo);
 
-    _globalValueController.messageMapListAdd(conversation!.conversationId!, sendInfo2ReceiveInfo);
-
-    _globalValueController.isarSaveMessage([sendInfo2ReceiveInfo],conversation!.conversationId!);
+    _globalValueController
+        .isarSaveMessage([sendInfo], conversation!.conversationId!);
 
     textEditingController.clear();
     sendMessageStr.value = '';
-
-  }
-
-
-  MessageInfo _sendInfo2ReceiveInfo(MessageInfo sendInfo) {
-    return MessageInfo(
-        cmd: sendInfo.cmd,
-        sender: sendInfo.sender,
-        receivers: sendInfo.receivers,
-        serviceName: sendInfo.serviceName,
-        messageTime: sendInfo.messageTime,
-        data: sendInfo.data);
   }
 }

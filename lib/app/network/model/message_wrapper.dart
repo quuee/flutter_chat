@@ -2,21 +2,21 @@
 import 'dart:convert';
 
 class MessageWrapper{
-  int cmd;
+  int conversationType;
   dynamic data;
 
   MessageWrapper({
-    required this.cmd,
+    required this.conversationType,
     required this.data
   });
 
   factory MessageWrapper.fromJson(Map<String, dynamic> json) => MessageWrapper(
-    cmd: json["cmd"],
+    conversationType: json["conversationType"],
     data: json["data"],
   );
 
   Map<String, dynamic> toJson() => {
-    "cmd": cmd,
+    "conversationType": conversationType,
     "data": data,
   };
 

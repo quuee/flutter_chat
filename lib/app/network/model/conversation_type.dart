@@ -1,5 +1,5 @@
 
-class CmdType{
+class ConversationType{
   // static const LOGIN = 0;
   static const HEART_BEAT = 1;
   static const FORCE_LOGOUT = 2;
