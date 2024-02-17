@@ -155,6 +155,11 @@ class ContactsController extends BaseController {
     super.onReady();
   }
 
+  @override
+  onClose(){
+
+  }
+
   _loadContacts() async {
     var userDOStr = await _preferenceManager.getString(PreferenceManager.userDO);
     var userDO = userDoFromJson(userDOStr);

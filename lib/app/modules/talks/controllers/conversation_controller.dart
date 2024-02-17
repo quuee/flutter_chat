@@ -1,6 +1,9 @@
 
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
+import 'package:flutter_chat/app/data/remote/user_api.dart';
+import 'package:flutter_chat/app/model/api_result.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
+import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:get/get.dart';
 
@@ -35,6 +38,8 @@ class ConversationController extends BaseController {
   onRefreshPage() {
     // loadConversations();
   }
+
+
 
 
   deleteConversation(int conversationId){

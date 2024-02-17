@@ -98,26 +98,8 @@ class ChatController extends GetxController {
 
 
   _getChatLog() async {
-    // 1、从联系人进入聊天界面
-    if (conversation?.conversationId == null) {
-      // 可能存在会话 按当前用户+联系人查询
-      ConversationModel? cs = _isar.conversationModels
-          .filter()
-          .currentUserIdEqualTo(currentUser?.userId)
-          .contactUserIdsElementEqualTo(conversation!.contactUserIds.first)
-          .findFirstSync();
-      if (cs == null) {
-        conversation?.conversationId = IdUtil.getId();
-        _globalValueController.conversationList.add(conversation!);
-      } else {
-        conversation = cs;
-      }
-    } else {
-      // 2、从会话界面进入聊天
-      conversation = _globalValueController.conversationList.firstWhere(
-          (element) => element.conversationId == conversation?.conversationId);
-    }
 
+    _globalValueController.getConversation(conversation!);
     _globalValueController.loadChatLog(conversation!.conversationId!);
   }
 

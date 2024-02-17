@@ -93,7 +93,11 @@ class ConversationView extends BaseView<ConversationController> {
       ),
       onLongPressStart: (LongPressStartDetails details){
         logger.d('details.globalPosition: ${details.globalPosition.dx},${details.globalPosition.dy}');
-        PopupWindow.create(key: globalKey,dx: details.globalPosition.dx,dy:details.globalPosition.dy);
+        PopupWindow.create(key: globalKey,
+            dx: details.globalPosition.dx,
+            dy:details.globalPosition.dy,
+            conversationId: conversation.conversationId!,
+            deleteConversation: controller.deleteConversation);
 
       },
     );

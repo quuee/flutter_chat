@@ -12,14 +12,14 @@ class PopupWindow {
   ];
 
   static double singleMenuItemWidth = 80; // 单个
-  static double singleMenuItemHeight = 30;
+  static double singleMenuItemHeight = 50;
 
   // 菜单整体宽度
   static double menuWidth = 0;
   // 菜单整体高度
   static double menuHeight = 0;
 
-  static _buildMenuItem() {
+  static _buildMenuItem(Function(int) callback,int id) {
     List<Widget> widgets = items
         .map<Widget>((e) => InkWell(
               child: Container(
@@ -34,7 +34,8 @@ class PopupWindow {
                 ),
               ),
               onTap: () {
-
+                callback(id);
+                hint();
               },
             ))
         .toList();
@@ -51,6 +52,8 @@ class PopupWindow {
     Widget? child,
     double dx = 0,
     double dy = 0,
+    required int conversationId,
+    required Function(int) deleteConversation
   }) {
     if (key == null) {
       return;
@@ -84,7 +87,7 @@ class PopupWindow {
                           top: height,
                           left: left,
                           child: child ??
-                              SingleChildScrollView(child: _buildMenuItem()),
+                              SingleChildScrollView(child: _buildMenuItem(deleteConversation,conversationId)),
                         )
                       ],
                     ),

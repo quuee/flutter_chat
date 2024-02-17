@@ -1,10 +1,20 @@
 
+import 'package:isar/isar.dart';
+part 'contacter_model.g.dart';
+// dart run build_runner build
+@collection
 class ContacterModel{
-  int userId;
+  @Name('userId')
+  Id userId;
+  @Name('account')
   String account;
+  @Name('nickname')
   String nickname;
+  @Name('phone')
   String phone;
+  @Name('email')
   String email;
+  @Name('avatarUrl')
   String avatarUrl;
 
   ContacterModel({
