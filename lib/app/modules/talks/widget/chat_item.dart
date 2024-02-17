@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/modules/talks/widget/chat_item_image.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_text.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:flutter_chat/app/network/model/message_type.dart';
@@ -21,13 +22,15 @@ class ChatItem extends StatelessWidget {
     switch (messageInfo.contentType) {
       case MessageType.text:
         {
-          child = _buildLayout(ChatText(
+          child = _buildLayout(ChatTextView(
             content: messageInfo.content,
           ));
         }
         break;
       case MessageType.picture:
-        {}
+        {
+          child = _buildLayout(ChatImageView(imageElement: messageInfo.image!));
+        }
         break;
       case MessageType.voice:
         {}

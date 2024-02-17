@@ -23,7 +23,8 @@ class MessageInfo {
       required this.sender,
       required this.receivers,
       required this.serviceName,
-      required this.contentTime, required this.contentType,
+      required this.contentTime,
+      required this.contentType,
       required this.content,
       this.image,
       this.sound});

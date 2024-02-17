@@ -3,6 +3,7 @@ import 'package:flutter_chat/app/core/id_util.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/network/model/conversation_type.dart';
+import 'package:flutter_chat/app/network/model/image_element.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:flutter_chat/app/network/model/message_type.dart';
 import 'package:flutter_chat/app/network/model/message_wrapper.dart';
@@ -32,7 +33,9 @@ class ChatController extends GetxController {
   final GlobalValueController _globalValueController =
       Get.find<GlobalValueController>();
 
-  UserDO? get currentUser => _globalValueController.currentUser;
+  UserDO? get currentUser =>
+      _globalValueController.currentUser;
+
   RxMap<int, RxList<MessageInfo>> get messageMapListG =>
       _globalValueController.messageMapList;
 
@@ -40,13 +43,16 @@ class ChatController extends GetxController {
 
   RxBool keyboardShow = false.obs;
 
-  RxBool toolBtnShow = true.obs;
+  RxBool toolBtnOff = true.obs;
+
+  FocusNode textFocusNode = FocusNode();
 
   @override
   void onInit() {
     // _messageListen();
     conversation = Get.arguments;
     _getChatLog();
+    inputListener();
     super.onInit();
   }
 
@@ -70,6 +76,22 @@ class ChatController extends GetxController {
 
     super.onClose();
   }
+
+  inputListener(){
+    textFocusNode.addListener(() {
+      if(textFocusNode.hasFocus){
+        logger.i('textFocusNode.addListener:${toolBtnOff.value}');
+        toolBtnOff.value = true;//隐藏
+        keyboardShow.value = true;
+        leftKeyboardButton.value = false;
+      }else{
+        keyboardShow.value = false;
+        leftKeyboardButton.value = true;
+      }
+
+    });
+  }
+
 
   _getChatLog() async {
     // 1、从联系人进入聊天界面
@@ -95,7 +117,7 @@ class ChatController extends GetxController {
     _globalValueController.loadChatLog(conversation!.conversationId!);
   }
 
-  Future<void> sendMessage() async {
+  sendMessage() {
     MessageInfo sendInfo = MessageInfo(
         conversationType: ConversationType.PRIVATE_MESSAGE,
         sender: UserInfo(
@@ -123,5 +145,34 @@ class ChatController extends GetxController {
 
     textEditingController.clear();
     sendMessageStr.value = '';
+  }
+
+  sendImage(String imageLocalPath){
+    ImageElement image = ImageElement(imageLocalPath: imageLocalPath);
+    MessageInfo sendInfo = MessageInfo(
+        conversationType: ConversationType.PRIVATE_MESSAGE,
+        sender: UserInfo(
+            userId: _globalValueController.currentUser!.userId,
+            terminal: TerminalType.APP),
+        receivers: List.generate(
+            conversation!.contactUserIds.length,
+                (index) => UserInfo(
+                userId: conversation!.contactUserIds[index],
+                terminal: TerminalType.APP)),
+        serviceName: '',
+        contentTime: DateTime.now().toString(),
+        contentType: MessageType.picture,
+        content: '',
+    image: image);
+    var messageWrapper = MessageWrapper(
+        conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
+
+    _globalValueController.sendMessage(messageWrapper);
+
+    _globalValueController.messageMapListAdd(
+        conversation!.conversationId!, sendInfo);
+
+    _globalValueController
+        .isarSaveMessage([sendInfo], conversation!.conversationId!);
   }
 }

@@ -1,27 +1,35 @@
 import 'dart:convert';
 
+import 'package:isar/isar.dart';
+part 'image_element.g.dart';
+
+@embedded
 class ImageElement {
-  String? image;
+  String? imageUrl;
+  String? imageLocalPath;
   double? imageWidth;
   double? imageHeight;
   double? fileSize;
 
   ImageElement({
-    this.image,
+    this.imageUrl,
+    this.imageLocalPath,
     this.imageWidth,
     this.imageHeight,
     this.fileSize,
   });
 
   ImageElement.fromJson(Map<String, dynamic> json)
-      : image = json['imageUrl'],
+      : imageUrl = json['imageUrl'],
+        imageLocalPath = json['imageLocalPath'],
         imageWidth = json['imageWidth']?.toDouble(),
         imageHeight = json['imageHeight']?.toDouble(),
         fileSize = json['fileSize']?.toDouble();
 
   Map<String, dynamic> toJson() {
     return {
-      "imageUrl": image,
+      "imageUrl": imageUrl,
+      "imageLocalPath": imageLocalPath,
       "imageWidth": imageWidth,
       "imageHeight": imageHeight,
       "fileSize": fileSize,

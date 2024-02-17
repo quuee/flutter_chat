@@ -47,20 +47,22 @@ const ChatLogModelSchema = CollectionSchema(
       name: r'currentUserId',
       type: IsarType.long,
     ),
-    r'imagePath': PropertySchema(
+    r'image': PropertySchema(
       id: 6,
-      name: r'imagePath',
-      type: IsarType.string,
+      name: r'image',
+      type: IsarType.object,
+      target: r'ImageElement',
     ),
     r'senderId': PropertySchema(
       id: 7,
       name: r'senderId',
       type: IsarType.long,
     ),
-    r'soundPath': PropertySchema(
+    r'sound': PropertySchema(
       id: 8,
-      name: r'soundPath',
-      type: IsarType.string,
+      name: r'sound',
+      type: IsarType.object,
+      target: r'SoundElement',
     )
   },
   estimateSize: _chatLogModelEstimateSize,
@@ -70,7 +72,10 @@ const ChatLogModelSchema = CollectionSchema(
   idName: r'logId',
   indexes: {},
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {
+    r'ImageElement': ImageElementSchema,
+    r'SoundElement': SoundElementSchema
+  },
   getId: _chatLogModelGetId,
   getLinks: _chatLogModelGetLinks,
   attach: _chatLogModelAttach,
@@ -86,15 +91,19 @@ int _chatLogModelEstimateSize(
   bytesCount += 3 + object.content.length * 3;
   bytesCount += 3 + object.contentTime.length * 3;
   {
-    final value = object.imagePath;
+    final value = object.image;
     if (value != null) {
-      bytesCount += 3 + value.length * 3;
+      bytesCount += 3 +
+          ImageElementSchema.estimateSize(
+              value, allOffsets[ImageElement]!, allOffsets);
     }
   }
   {
-    final value = object.soundPath;
+    final value = object.sound;
     if (value != null) {
-      bytesCount += 3 + value.length * 3;
+      bytesCount += 3 +
+          SoundElementSchema.estimateSize(
+              value, allOffsets[SoundElement]!, allOffsets);
     }
   }
   return bytesCount;
@@ -112,9 +121,19 @@ void _chatLogModelSerialize(
   writer.writeLong(offsets[3], object.conversationId);
   writer.writeLong(offsets[4], object.conversationType);
   writer.writeLong(offsets[5], object.currentUserId);
-  writer.writeString(offsets[6], object.imagePath);
+  writer.writeObject<ImageElement>(
+    offsets[6],
+    allOffsets,
+    ImageElementSchema.serialize,
+    object.image,
+  );
   writer.writeLong(offsets[7], object.senderId);
-  writer.writeString(offsets[8], object.soundPath);
+  writer.writeObject<SoundElement>(
+    offsets[8],
+    allOffsets,
+    SoundElementSchema.serialize,
+    object.sound,
+  );
 }
 
 ChatLogModel _chatLogModelDeserialize(
@@ -130,10 +149,18 @@ ChatLogModel _chatLogModelDeserialize(
     conversationId: reader.readLong(offsets[3]),
     conversationType: reader.readLong(offsets[4]),
     currentUserId: reader.readLong(offsets[5]),
-    imagePath: reader.readStringOrNull(offsets[6]),
+    image: reader.readObjectOrNull<ImageElement>(
+      offsets[6],
+      ImageElementSchema.deserialize,
+      allOffsets,
+    ),
     logId: id,
     senderId: reader.readLong(offsets[7]),
-    soundPath: reader.readStringOrNull(offsets[8]),
+    sound: reader.readObjectOrNull<SoundElement>(
+      offsets[8],
+      SoundElementSchema.deserialize,
+      allOffsets,
+    ),
   );
   return object;
 }
@@ -158,11 +185,19 @@ P _chatLogModelDeserializeProp<P>(
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readObjectOrNull<ImageElement>(
+        offset,
+        ImageElementSchema.deserialize,
+        allOffsets,
+      )) as P;
     case 7:
       return (reader.readLong(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readObjectOrNull<SoundElement>(
+        offset,
+        SoundElementSchema.deserialize,
+        allOffsets,
+      )) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -761,155 +796,19 @@ extension ChatLogModelQueryFilter
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathIsNull() {
+      imageIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'imagePath',
+        property: r'image',
       ));
     });
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathIsNotNull() {
+      imageIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'imagePath',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'imagePath',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'imagePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'imagePath',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imagePath',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      imagePathIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'imagePath',
-        value: '',
+        property: r'image',
       ));
     });
   }
@@ -1043,162 +942,40 @@ extension ChatLogModelQueryFilter
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathIsNull() {
+      soundIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'soundPath',
+        property: r'sound',
       ));
     });
   }
 
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathIsNotNull() {
+      soundIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'soundPath',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'soundPath',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'soundPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'soundPath',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'soundPath',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition>
-      soundPathIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'soundPath',
-        value: '',
+        property: r'sound',
       ));
     });
   }
 }
 
 extension ChatLogModelQueryObject
-    on QueryBuilder<ChatLogModel, ChatLogModel, QFilterCondition> {}
+    on QueryBuilder<ChatLogModel, ChatLogModel, QFilterCondition> {
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition> image(
+      FilterQuery<ImageElement> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'image');
+    });
+  }
+
+  QueryBuilder<ChatLogModel, ChatLogModel, QAfterFilterCondition> sound(
+      FilterQuery<SoundElement> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'sound');
+    });
+  }
+}
 
 extension ChatLogModelQueryLinks
     on QueryBuilder<ChatLogModel, ChatLogModel, QFilterCondition> {}
@@ -1284,18 +1061,6 @@ extension ChatLogModelQuerySortBy
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByImagePath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imagePath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortByImagePathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imagePath', Sort.desc);
-    });
-  }
-
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySenderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'senderId', Sort.asc);
@@ -1305,18 +1070,6 @@ extension ChatLogModelQuerySortBy
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySenderIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'senderId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySoundPath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'soundPath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> sortBySoundPathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'soundPath', Sort.desc);
     });
   }
 }
@@ -1402,18 +1155,6 @@ extension ChatLogModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByImagePath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imagePath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByImagePathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imagePath', Sort.desc);
-    });
-  }
-
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenByLogId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'logId', Sort.asc);
@@ -1435,18 +1176,6 @@ extension ChatLogModelQuerySortThenBy
   QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySenderIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'senderId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySoundPath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'soundPath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QAfterSortBy> thenBySoundPathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'soundPath', Sort.desc);
     });
   }
 }
@@ -1494,23 +1223,9 @@ extension ChatLogModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctByImagePath(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'imagePath', caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctBySenderId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'senderId');
-    });
-  }
-
-  QueryBuilder<ChatLogModel, ChatLogModel, QDistinct> distinctBySoundPath(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'soundPath', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1559,9 +1274,9 @@ extension ChatLogModelQueryProperty
     });
   }
 
-  QueryBuilder<ChatLogModel, String?, QQueryOperations> imagePathProperty() {
+  QueryBuilder<ChatLogModel, ImageElement?, QQueryOperations> imageProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'imagePath');
+      return query.addPropertyName(r'image');
     });
   }
 
@@ -1571,9 +1286,9 @@ extension ChatLogModelQueryProperty
     });
   }
 
-  QueryBuilder<ChatLogModel, String?, QQueryOperations> soundPathProperty() {
+  QueryBuilder<ChatLogModel, SoundElement?, QQueryOperations> soundProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'soundPath');
+      return query.addPropertyName(r'sound');
     });
   }
 }

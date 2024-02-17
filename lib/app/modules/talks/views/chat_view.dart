@@ -30,7 +30,9 @@ class ChatView extends GetView<ChatController> {
           child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
+          controller.keyboardShow.value = false;
+          controller.toolBtnOff.value = true;
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
         },
         child: Column(
           children: [
@@ -62,7 +64,7 @@ class ChatView extends GetView<ChatController> {
                     ),
                     child: TextField(
                       controller: controller.textEditingController,
-                      // focusNode: controller.textFocusNode,
+                      focusNode: controller.textFocusNode,
                       maxLines: 4,
                       minLines: 1,
                       keyboardType: TextInputType.multiline,
@@ -87,7 +89,7 @@ class ChatView extends GetView<ChatController> {
 
             // 隐藏的工具栏
             Obx(() => Offstage(
-              offstage: controller.toolBtnShow.value, // true隐藏
+              offstage: controller.toolBtnOff.value, // true隐藏
               child: SizedBox(
                 height: 200,
                 child: GridView(
@@ -134,16 +136,17 @@ class ChatView extends GetView<ChatController> {
           color: AppColors.colorLightGreen,
         ));
     var toolButton = IconButton(onPressed: () {
-      if(!controller.keyboardShow.value && controller.toolBtnShow.value){
-        controller.toolBtnShow.value = false;
+      if(!controller.keyboardShow.value && controller.toolBtnOff.value){
+        controller.toolBtnOff.value = false;
       }else if(controller.keyboardShow.value){
         SystemChannels.textInput.invokeMethod('TextInput.hide');
-        controller.keyboardShow.value = false;
-        controller.toolBtnShow.value = false;
+        controller.keyboardShow.value = false; //隐藏
+        controller.textFocusNode.unfocus();
+        controller.toolBtnOff.value = false; //显示
       }else{
         SystemChannels.textInput.invokeMethod('TextInput.show');
-        controller.keyboardShow.value = true;
-        controller.toolBtnShow.value = true;
+        controller.keyboardShow.value = true; // 显示
+        controller.toolBtnOff.value = true; // 隐藏
       }
     }, icon: const Icon(Icons.add));
     return Obx(() =>
@@ -252,12 +255,13 @@ class ChatView extends GetView<ChatController> {
           if (!controller.keyboardShow.value) {
             // 控制键盘弹起
             controller.keyboardShow.value = true;
-            controller.toolBtnShow.value = true;
+            controller.toolBtnOff.value = true;
             SystemChannels.textInput.invokeMethod('TextInput.show');
           } else {
-            controller.keyboardShow.value = false;
-            controller.toolBtnShow.value = true;
+            controller.keyboardShow.value = false; // 隐藏
+            controller.toolBtnOff.value = true; // 隐藏
             SystemChannels.textInput.invokeMethod('TextInput.hide');
+            controller.textFocusNode.unfocus();
           }
           controller.leftKeyboardButton.value =
               !controller.leftKeyboardButton.value;

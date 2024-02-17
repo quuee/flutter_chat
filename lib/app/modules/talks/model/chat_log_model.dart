@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_chat/app/network/model/conversation_type.dart';
+import 'package:flutter_chat/app/network/model/image_element.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/sound_element.dart';
 import 'package:flutter_chat/app/network/model/user_info.dart';
 import 'package:isar/isar.dart';
 
@@ -32,10 +34,10 @@ class ChatLogModel {
   String content;
   @Name('contentTime')
   String contentTime;
-  @Name('imagePath')
-  String? imagePath;
-  @Name('soundPath')
-  String? soundPath;
+  @Name('image')
+  ImageElement? image;
+  @Name('sound')
+  SoundElement? sound;
 
   ChatLogModel({
     this.logId,
@@ -46,8 +48,8 @@ class ChatLogModel {
     required this.content,
     required this.contentTime,
     required this.contentType,
-    this.imagePath,
-    this.soundPath,
+    this.image,
+    this.sound,
   });
 
   factory ChatLogModel.fromJson(Map<String, dynamic> json) => ChatLogModel(
@@ -59,8 +61,8 @@ class ChatLogModel {
         content: json["content"],
         contentTime: json["contentTime"],
         contentType: json["contentType"],
-        imagePath: json["imagePath"],
-        soundPath: json["soundPath"],
+    image: ImageElement.fromJson(json['image'] ?? {}),
+    sound: SoundElement.fromJson(json['sound'] ?? {}),
       );
 
   Map<String, dynamic> toJson() => {
@@ -72,8 +74,8 @@ class ChatLogModel {
         "content": content,
         "contentTime": contentTime,
         "contentType": contentType,
-        "imagePath": imagePath,
-        "soundPath": soundPath,
+        "image": image,
+        "sound": sound,
       };
 
   static ChatLogModel convertFromReceiveInfo(
@@ -86,8 +88,8 @@ class ChatLogModel {
         content: receiveInfo.content,
         contentTime: receiveInfo.contentTime,
         contentType: receiveInfo.contentType,
-        imagePath: receiveInfo.image?.image,
-        soundPath: receiveInfo.sound?.soundPath,
+        image: receiveInfo.image,
+        sound: receiveInfo.sound,
       );
 
   static MessageInfo convertToReceiveInfo(ChatLogModel chatLogModel) =>
@@ -108,5 +110,7 @@ class ChatLogModel {
           contentTime: chatLogModel.contentTime,
           content: chatLogModel.content,
           serviceName: '',
-          contentType: chatLogModel.contentType);
+          contentType: chatLogModel.contentType,
+      image: chatLogModel.image,
+      sound: chatLogModel.sound);
 }

@@ -6,6 +6,7 @@ import 'package:flutter_chat/app/modules/talks/model/chat_log_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:flutter_chat/app/network/model/conversation_type.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
+import 'package:flutter_chat/app/network/model/message_type.dart';
 import 'package:flutter_chat/app/network/model/message_wrapper.dart';
 import 'package:flutter_chat/app/network/websocket_provider.dart';
 import 'package:flutter_chat/flavors/build_config.dart';
@@ -46,24 +47,8 @@ class GlobalValueController extends GetxController {
         webSocketProvider.listen((msg) {
           // logger.i('Received: $msg');
           MessageWrapper data = MessageWrapper.fromJson(json.decode(msg));
-          if (data.conversationType == ConversationType.PRIVATE_MESSAGE) {
-            MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
-            for (var conversation in conversationList) {
-              if (conversation.contactUserIds.first ==
-                  receiveInfo.sender.userId) {
 
-                conversation.lastMessage = receiveInfo.content;
-
-                messageMapList[conversation.conversationId]?.add(receiveInfo);
-
-                isarSaveMessage([receiveInfo],conversation.conversationId!);
-              }
-            }
-          } else if (data.conversationType == ConversationType.GROUP_MESSAGE) {}
-
-          logger.i(
-            '处理接收的消息${data.toJsonString()}',
-          );
+          _switchConversationTypeHandler(data);
 
           // 刷新消息 更新会话界面ui
           conversationList.refresh();
@@ -75,7 +60,68 @@ class GlobalValueController extends GetxController {
         webSocketProvider.startHeartBeat();
       }
     });
+  }
 
+  // 处理不同类型会话
+  _switchConversationTypeHandler(MessageWrapper data) {
+    switch (data.conversationType) {
+      case ConversationType.PRIVATE_MESSAGE:
+        MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
+        logger.i(
+          '私聊消息${receiveInfo.toJsonString()}',
+        );
+        for (var conversation in conversationList) {
+          // 接收服务器消息 当聊天对象是发送对象
+          // if (conversation.contactUserIds.first == receiveInfo.sender.userId) { }
+          _switchMessageTypeHandler(receiveInfo);
+          conversation.lastMessage = receiveInfo.content;
+          messageMapListAdd(conversation.conversationId!, receiveInfo);
+          isarSaveMessage([receiveInfo], conversation.conversationId!);
+        }
+        break;
+
+      case ConversationType.GROUP_MESSAGE:
+        MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
+        logger.i(
+          '群聊消息${receiveInfo.toJsonString()}',
+        );
+        break;
+
+      case ConversationType.HEART_BEAT:
+        logger.i(
+          '心跳消息${data.toJsonString()}',
+        );
+        break;
+
+      case ConversationType.FORCE_LOGOUT:
+        logger.i(
+          '强制下线消息${data.toJsonString()}',
+        );
+        break;
+    }
+  }
+
+  // 处理不同类型消息
+  _switchMessageTypeHandler(MessageInfo receiveInfo) {
+    switch (receiveInfo.contentType) {
+      case MessageType.text:
+        break;
+      case MessageType.picture:
+        receiveInfo.content = '[图片]';
+        break;
+      case MessageType.voice:
+        receiveInfo.content = '[语音]';
+        break;
+      case MessageType.video:
+        receiveInfo.content = '[视频]';
+        break;
+      case MessageType.atText:
+        receiveInfo.content = '[@我]';
+        break;
+      case MessageType.location:
+        receiveInfo.content = '[定位]';
+        break;
+    }
   }
 
   // 加载用户信息
@@ -97,7 +143,7 @@ class GlobalValueController extends GetxController {
   }
 
   // 会话存入本地数据库
-  isarSaveConversation(ConversationModel conversation){
+  isarSaveConversation(ConversationModel conversation) {
     _isar.writeTxn(() => _isar.conversationModels.put(conversation));
   }
 
@@ -137,7 +183,7 @@ class GlobalValueController extends GetxController {
     List<ChatLogModel> chats = _isar.chatLogModels
         .filter()
         .conversationIdEqualTo(conversationId)
-    .limit(30)
+        .limit(30)
         .findAllSync();
     List<MessageInfo> temp =
         chats.map((e) => ChatLogModel.convertToReceiveInfo(e)).toList();
@@ -146,14 +192,16 @@ class GlobalValueController extends GetxController {
     //   messageMapList[conversationId]!.clear();
     //
     // }
-    messageMapList.addAll({conversationId:RxList(temp)});
-
+    messageMapList.addAll({conversationId: RxList(temp)});
   }
 
   // 更新messageMapList
-  messageMapListAdd(int conversationId,MessageInfo receiveInfo){
-    List<MessageInfo> messageList = messageMapList[conversationId] ?? RxList.empty(growable: true);
+  messageMapListAdd(int conversationId, MessageInfo receiveInfo) {
+    List<MessageInfo> messageList =
+        messageMapList[conversationId] ?? RxList.empty(growable: true);
     messageList.add(receiveInfo);
-    messageMapList.addAll({conversationId:RxList(messageList)});
+    messageMapList.addAll({conversationId: RxList(messageList)});
+
+    // 如果发送者是自己 会话消息不会及时更新
   }
 }

@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-class ChatText extends StatelessWidget {
-  ChatText({super.key,this.content});
+class ChatTextView extends StatelessWidget {
+  ChatTextView({super.key,this.content});
 
   String? content;
 

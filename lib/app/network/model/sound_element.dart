@@ -1,11 +1,14 @@
-/// Voice message content
+
+import 'package:isar/isar.dart';
+part 'sound_element.g.dart';
+
+@embedded
 class SoundElement {
   /// URL address
   String? sourceUrl;
 
   /// Local address
-
-  String? soundPath;
+  String? soundLocalPath;
 
   /// Voice file size
   double? dataSize;
@@ -13,11 +16,11 @@ class SoundElement {
   /// time
   int? duration;
 
-  SoundElement({this.sourceUrl, this.soundPath, this.dataSize, this.duration});
+  SoundElement({this.sourceUrl, this.soundLocalPath, this.dataSize, this.duration});
 
   SoundElement.fromJson(Map<String, dynamic> json) {
     sourceUrl = json['sourceUrl'];
-    soundPath = json['soundPath'];
+    soundLocalPath = json['soundLocalPath'];
     dataSize = json['dataSize'];
     duration = json['duration'];
   }
@@ -25,7 +28,7 @@ class SoundElement {
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     data['sourceUrl'] = sourceUrl;
-    data['soundPath'] = soundPath;
+    data['soundLocalPath'] = soundLocalPath;
     data['dataSize'] = dataSize;
     data['duration'] = duration;
     return data;
@@ -33,6 +36,6 @@ class SoundElement {
 
   @override
   String toString() {
-    return 'SoundElem{sourceUrl: $sourceUrl, soundPath: $soundPath, dataSize: $dataSize, duration: $duration}';
+    return 'SoundElem{sourceUrl: $sourceUrl, soundPath: $soundLocalPath, dataSize: $dataSize, duration: $duration}';
   }
 }
