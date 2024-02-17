@@ -109,6 +109,8 @@ class ChatView extends GetView<ChatController> {
                       for (XFile f in medias) {
                         String mimeType = f.mimeType??'';
                         String path = f.path??'';
+
+                        controller.sendImage(path);
                       }},
                       icon: Icon(Icons.photo),),
                     Icon(Icons.map),

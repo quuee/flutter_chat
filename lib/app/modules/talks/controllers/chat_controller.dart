@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/id_util.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
+import 'package:flutter_chat/app/data/remote/file_upload_api.dart';
+import 'package:flutter_chat/app/model/api_result.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/network/model/conversation_type.dart';
 import 'package:flutter_chat/app/network/model/image_element.dart';
@@ -147,8 +151,16 @@ class ChatController extends GetxController {
     sendMessageStr.value = '';
   }
 
-  sendImage(String imageLocalPath){
-    ImageElement image = ImageElement(imageLocalPath: imageLocalPath);
+  sendImage(String imageLocalPath) async {
+
+    ApiResult? result = await FileUploadApi.uploadImage(File(imageLocalPath));
+    String imageUrl='';
+    if(result?.code == 0){
+      var list = result?.data as List<dynamic>;
+      imageUrl = list.first as String;
+    }
+
+    ImageElement image = ImageElement(imageLocalPath: imageLocalPath,imageUrl: imageUrl);
     MessageInfo sendInfo = MessageInfo(
         conversationType: ConversationType.PRIVATE_MESSAGE,
         sender: UserInfo(
@@ -166,6 +178,8 @@ class ChatController extends GetxController {
     image: image);
     var messageWrapper = MessageWrapper(
         conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
+    
+
 
     _globalValueController.sendMessage(messageWrapper);
 
