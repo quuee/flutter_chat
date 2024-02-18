@@ -1,11 +1,13 @@
 
 import 'package:isar/isar.dart';
+
 part 'contacter_model.g.dart';
 // dart run build_runner build
+
 @collection
 class ContacterModel{
   @Name('userId')
-  Id userId;
+  Id? userId;
   @Name('account')
   String account;
   @Name('nickname')

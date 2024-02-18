@@ -46,6 +46,7 @@ class AssetImageView extends StatelessWidget {
           fit: fit ?? BoxFit.contain,
         );
       case "png":
+      case "webp":
       case "jpg":
       case "jpeg":
         return Image.asset(

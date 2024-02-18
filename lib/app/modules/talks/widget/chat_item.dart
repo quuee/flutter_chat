@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_image.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_text.dart';
+import 'package:flutter_chat/app/modules/talks/widget/chat_item_voice.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:flutter_chat/app/network/model/message_type.dart';
 
@@ -33,7 +34,13 @@ class ChatItem extends StatelessWidget {
         }
         break;
       case MessageType.voice:
-        {}
+        {
+          child = _buildLayout(ChatItemVoice(
+            soundLocalPath: messageInfo.sound?.soundLocalPath,
+            soundUrl: messageInfo.sound?.sourceUrl,
+            duration: messageInfo.sound?.duration,
+          ));
+        }
         break;
     }
     return child;

@@ -16,6 +16,9 @@ class SoundElement {
   /// time
   int? duration;
 
+  // @Ignore()
+  // Stream? voiceStream;
+
   SoundElement({this.sourceUrl, this.soundLocalPath, this.dataSize, this.duration});
 
   SoundElement.fromJson(Map<String, dynamic> json) {

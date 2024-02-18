@@ -76,13 +76,16 @@ class GlobalValueController extends GetxController {
         );
         var newConversation = conversationList.firstWhereOrNull((element) => element.contactUserIds.first == receiveInfo.sender.userId);
         if(newConversation?.conversationId == null){
+
+          ContacterModel? contacterModel = _isar.contacterModels.getSync(receiveInfo.sender.userId);
+
           // 不存在会话 则创建
           newConversation = ConversationModel(conversationId: IdUtil.getId(),
               contactUserIds: [receiveInfo.sender.userId],
               conversationType: ConversationType.PRIVATE_MESSAGE,
               currentUserId: currentUser?.userId,
-              conversationName: 'test',
-              avatarUrl: '',
+              conversationName: contacterModel?.nickname??"unknown",
+              avatarUrl: contacterModel?.avatarUrl??"",
               contentType: receiveInfo.contentType,
               lastMessage: receiveInfo.content,
               lastTime: receiveInfo.contentTime);

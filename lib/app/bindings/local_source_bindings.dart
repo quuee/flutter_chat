@@ -1,3 +1,4 @@
+import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/conversation_model.dart';
 import 'package:flutter_chat/app/modules/talks/model/chat_log_model.dart';
 import 'package:get/get.dart';
@@ -28,13 +29,14 @@ class LocalSourceBindings implements Bindings {
   }
 
   initIsar() async {
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await getExternalStorageDirectory();
     return Isar.open(
       [
         ConversationModelSchema,
         ChatLogModelSchema,
+        ContacterModelSchema,
       ],
-      directory: dir.path,
+      directory: dir!.path,
     );
   }
 

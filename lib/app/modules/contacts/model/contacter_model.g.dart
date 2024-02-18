@@ -124,7 +124,7 @@ P _contacterModelDeserializeProp<P>(
 }
 
 Id _contacterModelGetId(ContacterModel object) {
-  return object.userId;
+  return object.userId ?? Isar.autoIncrement;
 }
 
 List<IsarLinkBase<dynamic>> _contacterModelGetLinks(ContacterModel object) {
@@ -898,7 +898,25 @@ extension ContacterModelQueryFilter
   }
 
   QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
-      userIdEqualTo(Id value) {
+      userIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'userId',
+      ));
+    });
+  }
+
+  QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
+      userIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'userId',
+      ));
+    });
+  }
+
+  QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
+      userIdEqualTo(Id? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'userId',
@@ -909,7 +927,7 @@ extension ContacterModelQueryFilter
 
   QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
       userIdGreaterThan(
-    Id value, {
+    Id? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -923,7 +941,7 @@ extension ContacterModelQueryFilter
 
   QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
       userIdLessThan(
-    Id value, {
+    Id? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -937,8 +955,8 @@ extension ContacterModelQueryFilter
 
   QueryBuilder<ContacterModel, ContacterModel, QAfterFilterCondition>
       userIdBetween(
-    Id lower,
-    Id upper, {
+    Id? lower,
+    Id? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {

@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_chat/app/model/api_result.dart';
@@ -8,17 +7,21 @@ import 'package:flutter_chat/flavors/build_config.dart';
 class FileUploadApi {
   static final logger = BuildConfig.instance.config.logger;
 
-  static Future<ApiResult?> uploadImage(File file) async {
+  static Future<ApiResult?> uploadFile(
+      {required String filePath,
+      required String filename,
+      required String mimeType}) async {
     var op = Options(
         contentType: Headers.multipartFormDataContentType,
         method: DioUtil.post);
 
     var formData = FormData();
-    // formData.fields.addAll({})
-    formData.files.addAll([MapEntry('files', MultipartFile.fromFileSync(file.path))]);
+    formData.fields.add(MapEntry('filename', filename));
+    formData.fields.add(MapEntry('mimeType', mimeType));
+    formData.files
+        .addAll([MapEntry('file', MultipartFile.fromFileSync(filePath))]);
     try {
-      var response = await DioUtil.instance
-          .request('/upload/images', data: formData, options: op);
+      var response = await DioUtil.instance.request('/upload/file', data: formData, options: op);
       ApiResult apiResult = ApiResult.fromJson(response.data);
       return apiResult;
     } on DioException catch (e) {
@@ -26,4 +29,5 @@ class FileUploadApi {
       return null;
     }
   }
+
 }

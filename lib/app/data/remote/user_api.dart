@@ -14,12 +14,13 @@ class UserApi {
     map['account'] = account;
     map['password'] = password;
     var op = Options(
-        contentType: Headers.jsonContentType, method: DioUtil.post);
+        contentType: Headers.jsonContentType,
+        method: DioUtil.post);
     try {
-      var response = await DioUtil.instance
-          .request('/generate/login', data: map, options: op);
-      ApiResult apiResult = ApiResult.fromJson(response.data);
-      return apiResult;
+
+      Response response = await DioUtil.instance.request('/generate/login', data: map,options: op);
+      return ApiResult.fromJson(response.data);
+
     } on DioException catch (e) {
 
       return null;
@@ -27,15 +28,16 @@ class UserApi {
   }
 
   static Future<ApiResult?> loadContacts(int userId) async {
-    var op = Options(
-        contentType: Headers.jsonContentType, method: DioUtil.get);
+
     Map<String, dynamic> map = {};
     map['userId'] = userId;
+    var op = Options(
+        contentType: Headers.jsonContentType,
+        method: DioUtil.get);
     try {
-    var response = await DioUtil.instance
-        .request('/contact/list', params: map, options: op);
-    ApiResult apiResult = ApiResult.fromJson(response.data);
-    return apiResult;
+
+      Response response =  await DioUtil().request('/contact/list', params: map,options: op);
+      return ApiResult.fromJson(response.data);
     } on DioException catch (e) {
 
       return null;

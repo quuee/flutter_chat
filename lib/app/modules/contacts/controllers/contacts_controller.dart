@@ -5,6 +5,7 @@ import 'package:flutter_chat/app/model/api_result.dart';
 import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
 
 import 'package:lpinyin/lpinyin.dart';
 
@@ -12,6 +13,7 @@ import '/app/core/base/base_controller.dart';
 
 class ContactsController extends BaseController {
   final PreferenceManager _preferenceManager = Get.find(tag: (PreferenceManager).toString());
+  final Isar _isar = Get.find(tag: (Isar).toString());
   List<String> letters = [
     '↑',
     'A',
@@ -166,8 +168,11 @@ class ContactsController extends BaseController {
     ApiResult? loadContacts = await UserApi.loadContacts(userDO.userId);
     List dataList = loadContacts?.data as List;
 
+    List<ContacterModel> cList = [];
+
     for (var element in dataList) {
       ContacterModel contacterModel = ContacterModel.fromJson(element);
+      cList.add(contacterModel);
       // 提取pinyin首字母
       String p = PinyinHelper.getShortPinyin(contacterModel.nickname)
           .substring(0, 1)
@@ -182,6 +187,8 @@ class ContactsController extends BaseController {
       }
     }
 
+    // 写入数据库
+    _isar.writeTxn(() => _isar.contacterModels.putAll(cList));
     update();
 
   }

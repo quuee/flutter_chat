@@ -12,6 +12,7 @@ class PermissionController extends GetxController {
       Permission.speech,
       Permission.location,
       Permission.notification,
+      Permission.photos,
     ]);
     super.onInit();
   }

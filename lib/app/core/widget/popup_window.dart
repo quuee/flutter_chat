@@ -34,7 +34,8 @@ class PopupWindow {
                 ),
               ),
               onTap: () {
-                callback(id);
+                // callback(id);
+                callback.call(id);
                 hint();
               },
             ))

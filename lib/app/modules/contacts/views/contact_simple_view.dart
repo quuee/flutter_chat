@@ -139,7 +139,7 @@ class ContactSimple extends StatelessWidget {
               var conversation = ConversationModel(
                 conversationName: contact.nickname,
                 conversationType: ConversationType.PRIVATE_MESSAGE,
-                contactUserIds: [contact.userId],
+                contactUserIds: [contact.userId!],
                 avatarUrl: contact.avatarUrl,);
               Get.toNamed(Routes.TOCHAT,arguments: conversation);
             },
