@@ -1,9 +1,9 @@
 
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/values/app_colors.dart';
-import 'package:flutter_chat/app/network/dio_util.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -43,6 +43,8 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
           setState(() {
             if (_isPlaying) {
               _isPlaying = false;
+              // 重置 使可以点击重复播放
+              _audioPlayer.seek(const Duration(seconds: 0));
               _audioPlayer.stop();
             }
           });
@@ -52,6 +54,8 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
   }
 
   _initSource() async {
+    // TODO 当新的消息进来，新的消息不是播放对应的音频
+
     String? path = widget.soundLocalPath;
     String? url = widget.soundUrl;
     if(path != null && path.trim().isNotEmpty){
@@ -61,26 +65,32 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
       }
     }
 
-    // String? savePath;
-    // var last = url!.split('/').last;
-    // last = last.split('?').first;
-    // if(savePath==null || savePath.trim().isEmpty){
-    //   final dir = await getExternalStorageDirectory();
-    //   savePath = "${dir?.path}/voices/$last";
-    // }
+    // 如果本地不存在 则存入本地再播放
+    String? savePath;
+    var last = url!.split('/').last;
+    last = last.split('?').first;
+    if(savePath==null || savePath.trim().isEmpty){
+      final dir = await getExternalStorageDirectory();
+      savePath = "${dir?.path}/voices/$last";
+    }
 
-    // DioUtil.instance.download(url: url, savePath: savePath, onReceiveProgress: (int count,int total){
-    //   if(count/total == 1){
-    //     // 存在本地在播放
-    //     bool existsSync = File(savePath!).existsSync();
-    //     if(existsSync){
-    //       _audioPlayer.setFilePath(savePath);
-    //     }
-    //   }
-    // });
+    if(File(savePath).existsSync()){
+      return;
+    }
+    // dio 有baseUrl 每次下载都失败，只能重新创建dio
+    Dio().download(url, savePath,onReceiveProgress: (int count,int total){
+      if(count/total == 1){
+        // 存在本地在播放
+        bool existsSync = File(savePath!).existsSync();
+        if(existsSync){
+          _audioPlayer.setFilePath(savePath);
+        }
+        print('下载完成');
+      }
+    });
 
     // 可能网络功能打开不够彻底，在androidManifest.xml application android:usesCleartextTraffic="true"配置
-    await _audioPlayer.setUrl(url!);
+    // await _audioPlayer.setUrl(url!);
 
   }
 

@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/voice_record.dart';
@@ -123,7 +122,7 @@ class ChatController extends GetxController {
 
 
   _getChatLog() async {
-    _globalValueController.getConversation(conversation!);
+    conversation = _globalValueController.getConversation(conversation!);
     _globalValueController.loadChatLog(conversation!.conversationId!);
   }
 

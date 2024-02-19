@@ -26,6 +26,7 @@ class GlobalValueController extends GetxController {
   final WebSocketProvider webSocketProvider = Get.find<WebSocketProvider>();
   // 会话对象
   RxList<ConversationModel> conversationList = RxList.empty(growable: true);
+  // <会话id,消息集合>
   RxMap<int, RxList<MessageInfo>> messageMapList = RxMap.identity();
 
   // 在会话界面收到消息，打开聊天界面 消息需要一致存在
@@ -36,11 +37,14 @@ class GlobalValueController extends GetxController {
 
   UserDO? currentUser;
 
+  List<ContacterModel> cList = [];
+
   @override
   onInit() async {
+    await _loadUserInfo();// 加载当前用户
+    _loadContacts(); // 加载联系人
+    _loadConversations(); // 加载会话
     _initWebSocket();
-    await _loadUserInfo();
-    loadConversations();
     super.onInit();
   }
 
@@ -70,36 +74,21 @@ class GlobalValueController extends GetxController {
   _switchConversationTypeHandler(MessageWrapper data) {
     switch (data.conversationType) {
       case ConversationType.PRIVATE_MESSAGE:
-        MessageInfo receiveInfo = MessageInfo.fromJson(data.data);
+        MessageInfo messageInfo = MessageInfo.fromJson(data.data);
         logger.i(
-          '私聊消息${receiveInfo.toJsonString()}',
+          '私聊消息${messageInfo.toJsonString()}',
         );
-        var newConversation = conversationList.firstWhereOrNull((element) => element.contactUserIds.first == receiveInfo.sender.userId);
-        if(newConversation?.conversationId == null){
 
-          ContacterModel? contacterModel = _isar.contacterModels.getSync(receiveInfo.sender.userId);
-
-          // 不存在会话 则创建
-          newConversation = ConversationModel(conversationId: IdUtil.getId(),
-              contactUserIds: [receiveInfo.sender.userId],
-              conversationType: ConversationType.PRIVATE_MESSAGE,
-              currentUserId: currentUser?.userId,
-              conversationName: contacterModel?.nickname??"unknown",
-              avatarUrl: contacterModel?.avatarUrl??"",
-              contentType: receiveInfo.contentType,
-              lastMessage: receiveInfo.content,
-              lastTime: receiveInfo.contentTime);
-          conversationList.add(newConversation);
-        }
+        _newConversation(messageInfo);
 
         for (var conversation in conversationList) {
           // 接收服务器消息 当聊天对象是发送对象
           // if (conversation.contactUserIds.first == receiveInfo.sender.userId) { }
-          _switchMessageTypeHandler(receiveInfo);
-          conversation.lastTime = receiveInfo.contentTime;
-          conversation.lastMessage = receiveInfo.content;
-          messageMapListAdd(conversation.conversationId!, receiveInfo);
-          isarSaveMessage([receiveInfo], conversation.conversationId!);
+          _switchMessageTypeHandler(messageInfo);
+          conversation.lastTime = messageInfo.contentTime;
+          conversation.lastMessage = messageInfo.content;
+          messageMapListAdd(conversation.conversationId!, messageInfo);
+          isarSaveMessage([messageInfo], conversation.conversationId!);
         }
         break;
 
@@ -123,6 +112,39 @@ class GlobalValueController extends GetxController {
         break;
     }
   }
+
+  // newConversation 根据消息创建新会话
+  _newConversation(MessageInfo messageInfo){
+    // 如果没有通过联系人找到会话
+    ConversationModel? newConversation;
+    for (ConversationModel conversation in conversationList) {
+      bool b = conversation.contactUserIds.first == messageInfo.sender.userId;
+      if(b){
+        newConversation = conversation;
+        return ;
+      }
+    }
+
+    if(newConversation == null){
+
+      ContacterModel? contacterModel = _isar.contacterModels.getSync(messageInfo.sender.userId);
+
+      // 不存在会话 则创建
+      newConversation = ConversationModel(
+          conversationId: IdUtil.getId(),
+          contactUserIds: [messageInfo.sender.userId],
+          contactUsers: [contacterModel!],
+          conversationType: ConversationType.PRIVATE_MESSAGE,
+          currentUserId: currentUser?.userId,
+          conversationName: contacterModel.nickname,
+          avatarUrl: contacterModel.avatarUrl,
+          contentType: messageInfo.contentType,
+          lastMessage: messageInfo.content,
+          lastTime: messageInfo.contentTime);
+      conversationList.add(newConversation);
+    }
+  }
+
 
   // 处理不同类型消息
   _switchMessageTypeHandler(MessageInfo receiveInfo) {
@@ -155,7 +177,7 @@ class GlobalValueController extends GetxController {
   }
 
   // 加载会话
-  loadConversations() async {
+  _loadConversations() async {
     conversationList.clear();
     List<ConversationModel> temp = _isar.conversationModels
         .filter()
@@ -163,8 +185,55 @@ class GlobalValueController extends GetxController {
         .findAllSync();
     conversationList.addAllIf(temp.isNotEmpty, temp);
 
+    _conversationSetContracts();
     conversationList.refresh();
   }
+
+  // 获取会话
+  getConversation(ConversationModel conversation){
+    // 1、从联系人进入聊天界面,
+    if (conversation.conversationId == null) {
+      // 可能存在会话 按当前用户+联系人查询
+      ConversationModel? cs = _isar.conversationModels
+          .filter()
+          .currentUserIdEqualTo(currentUser?.userId)
+          .contactUserIdsElementEqualTo(conversation.contactUserIds.first)
+          .findFirstSync();
+      if (cs != null) {
+        conversation = cs;
+      } else {
+        conversation.conversationId = IdUtil.getId();
+      }
+      conversationList.add(conversation);
+    } else {
+      // 2、从会话界面进入聊天
+      conversation = conversationList.firstWhere(
+              (element) => element.conversationId == conversation.conversationId);
+    }
+    _conversationSetContracts();
+    return conversation;
+  }
+
+  // 加载联系人到会话 (是不是只需要加载单个联系人)
+  _conversationSetContracts(){
+
+    for (var element in conversationList) {
+      element.contactUsers ??= [];
+      List<ContacterModel?> contacts = _isar.contacterModels.getAllSync(element.contactUserIds);
+      for (ContacterModel? contact in contacts) {
+        bool isBlank = contact.isBlank!;
+        if(!isBlank){
+          // 去重
+          int index = element.contactUsers?.indexWhere((ee) => ee.userId == contact?.userId)??-1;
+          if(index<0){
+            element.contactUsers?.add(contact!);
+          }
+        }
+      }
+
+    }
+  }
+
 
   // 会话存入本地数据库
   isarSaveConversation(ConversationModel conversation) {
@@ -229,27 +298,19 @@ class GlobalValueController extends GetxController {
     // 如果发送者是自己 会话消息不会及时更新
   }
 
-  // 获取会话
-  getConversation(ConversationModel conversation){
-    // 1、从联系人进入聊天界面
-    if (conversation.conversationId == null) {
-      // 可能存在会话 按当前用户+联系人查询
-      ConversationModel? cs = _isar.conversationModels
-          .filter()
-          .currentUserIdEqualTo(currentUser?.userId)
-          .contactUserIdsElementEqualTo(conversation.contactUserIds.first)
-          .findFirstSync();
-      if (cs != null) {
-        conversation = cs;
-      } else {
-        conversation.conversationId = IdUtil.getId();
-        conversationList.add(conversation);
-      }
-    } else {
-      // 2、从会话界面进入聊天
-      conversation = conversationList.firstWhere(
-              (element) => element.conversationId == conversation.conversationId);
+
+  // 加载联系人
+  _loadContacts() async {
+    // var userDOStr = await _preferenceManager.getString(PreferenceManager.userDO);
+    // var userDO = userDoFromJson(userDOStr);
+    ApiResult? loadContacts = await UserApi.loadContacts(currentUser!.userId);
+    List dataList = loadContacts?.data as List;
+    for (var element in dataList) {
+      ContacterModel contacterModel = ContacterModel.fromJson(element);
+      cList.add(contacterModel);
     }
+    // 写入数据库
+    _isar.writeTxn(() => _isar.contacterModels.putAll(cList));
   }
 
 

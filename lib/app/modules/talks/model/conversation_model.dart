@@ -2,10 +2,12 @@
 
 import 'dart:convert';
 
+import 'package:flutter_chat/app/model/user_do.dart';
+import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:isar/isar.dart';
 
 part 'conversation_model.g.dart';
-//dart run build_runner build
+// dart run build_runner build
 
 List<ConversationModel> conversationModelFromJson(String str) => List<ConversationModel>.from(json.decode(str).map((x) => ConversationModel.fromJson(x)));
 
@@ -33,6 +35,9 @@ class ConversationModel {
   @Name('lastMessage')
   String? lastMessage;
 
+  @Ignore()
+  List<ContacterModel>? contactUsers;
+
   // @Ignore()
   // RxList<ReceiveInfo>? messageList;
 
@@ -46,6 +51,7 @@ class ConversationModel {
     this.contentType,
     this.lastTime,
     this.lastMessage,
+    this.contactUsers,
   });
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) => ConversationModel(
@@ -54,11 +60,12 @@ class ConversationModel {
     conversationType: json["conversationType"],
     contactUserIds: json["contactUserIds"],
     currentUserId: json["currentUserId"],
-
     avatarUrl: json["avatarUrl"],
     contentType: json["contentType"],
     lastTime: json["lastTime"],
     lastMessage: json["lastMessage"],
+    contactUsers: List<ContacterModel>.from(
+        json["contactUsers"].map((x) => ContacterModel.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -66,6 +73,7 @@ class ConversationModel {
     "conversationName": conversationName,
     "conversationType": conversationType,
     "contactUserIds": contactUserIds,
+    "contactUsers": contactUsers,
     "currentUserId": currentUserId,
     "avatarUrl": avatarUrl,
     "contentType": contentType,

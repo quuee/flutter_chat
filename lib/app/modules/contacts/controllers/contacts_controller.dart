@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/app/data/local/preference/preference_manager.dart';
-import 'package:flutter_chat/app/data/remote/user_api.dart';
-import 'package:flutter_chat/app/model/api_result.dart';
-import 'package:flutter_chat/app/model/user_do.dart';
+import 'package:flutter_chat/app/data/global/global_value_controller.dart';
+
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
@@ -12,7 +10,7 @@ import 'package:lpinyin/lpinyin.dart';
 import '/app/core/base/base_controller.dart';
 
 class ContactsController extends BaseController {
-  final PreferenceManager _preferenceManager = Get.find(tag: (PreferenceManager).toString());
+  // final PreferenceManager _preferenceManager = Get.find(tag: (PreferenceManager).toString());
   final Isar _isar = Get.find(tag: (Isar).toString());
   List<String> letters = [
     '↑',
@@ -150,10 +148,11 @@ class ContactsController extends BaseController {
   ScrollController contactsScroll = ScrollController();
 
   RxInt currentIndex = 0.obs;
+  final GlobalValueController _globalValueController = Get.find<GlobalValueController>();
 
   @override
   onReady() {
-    _loadContacts();
+    _convertContacts();
     super.onReady();
   }
 
@@ -162,33 +161,22 @@ class ContactsController extends BaseController {
 
   }
 
-  _loadContacts() async {
-    var userDOStr = await _preferenceManager.getString(PreferenceManager.userDO);
-    var userDO = userDoFromJson(userDOStr);
-    ApiResult? loadContacts = await UserApi.loadContacts(userDO.userId);
-    List dataList = loadContacts?.data as List;
+  _convertContacts() async {
 
-    List<ContacterModel> cList = [];
-
-    for (var element in dataList) {
-      ContacterModel contacterModel = ContacterModel.fromJson(element);
-      cList.add(contacterModel);
+    for (ContacterModel element in _globalValueController.cList) {
       // 提取pinyin首字母
-      String p = PinyinHelper.getShortPinyin(contacterModel.nickname)
+      String p = PinyinHelper.getShortPinyin(element.nickname)
           .substring(0, 1)
           .toUpperCase();
-
-      for (Map<String, List<ContacterModel>> element in contacts) {
-        for (var key in element.keys) {
+      for (Map<String, List<ContacterModel>> mm in contacts) {
+        for (var key in mm.keys) {
           if (key == p) {
-            element.entries.first.value.add(contacterModel);
+            mm.entries.first.value.add(element);
           }
         }
       }
     }
 
-    // 写入数据库
-    _isar.writeTxn(() => _isar.contacterModels.putAll(cList));
     update();
 
   }

@@ -1,4 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/core/values/app_values.dart';
+import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_image.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_text.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item_voice.dart';
@@ -7,8 +10,9 @@ import 'package:flutter_chat/app/network/model/message_type.dart';
 
 class ChatItem extends StatelessWidget {
   const ChatItem(
-      {super.key, required this.messageInfo, required this.isFromMsg});
+      {super.key, required this.messageInfo, required this.isFromMsg,required this.sender,});
 
+  final ContacterModel sender;
   final MessageInfo messageInfo;
 
   final bool isFromMsg;
@@ -54,8 +58,13 @@ class ChatItem extends StatelessWidget {
         // 消息发送中。。。CircularProgressIndicator
         // 消息发送成功||失败
 
+        // 头像
+        isFromMsg?CachedNetworkImage(imageUrl: sender.avatarUrl,width: AppValues.iconLargeSize,):const SizedBox.shrink(),
         // 消息体
         widget,
+        // 头像
+        isFromMsg?const SizedBox.shrink():CachedNetworkImage(imageUrl: sender.avatarUrl,width: AppValues.iconLargeSize,),
+
       ],
     );
   }

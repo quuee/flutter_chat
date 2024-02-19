@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/modules/contacts/views/contacts_view.dart';
 import 'package:flutter_chat/app/modules/explore/views/explore_view.dart';
 import 'package:flutter_chat/app/modules/me/views/me_view.dart';
