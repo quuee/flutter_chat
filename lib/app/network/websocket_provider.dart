@@ -43,28 +43,28 @@ class WebSocketProvider {
 
   final StreamController<ConnectStatusEnum> _socketStatusController = StreamController<ConnectStatusEnum>();
 
-  Stream<ConnectStatusEnum>? _socketStatusStream;
+  // Stream<ConnectStatusEnum>? _socketStatusStream;
 
   static WebSocketChannel? _channel;
 
   Timer? _heartBeat;
-  final int _heartTimes = 30;
+  final int _heartbeatSeconds = 30;
 
   final int _reconnectMax = 10;
   int _reconnectTimes = 0;
   Timer? _reconnectTimer;
 
-  Stream<dynamic> getWebSocketChannelStream() {
-    //Assign the value only once.
-    _webSocketChannelStream ??= _channel?.stream.asBroadcastStream();
-    return _webSocketChannelStream!;
-  }
+  // Stream<dynamic> getWebSocketChannelStream() {
+  //   // 只分配一次 重连后这个_webSocketChannelStream不对劲
+  //   _webSocketChannelStream ??= _channel?.stream.asBroadcastStream();
+  //   return _webSocketChannelStream!;
+  // }
 
-  Stream<ConnectStatusEnum> getSocketStatusStream() {
-    //Assign the value only once.
-    _socketStatusStream ??= _socketStatusController.stream.asBroadcastStream();
-    return _socketStatusStream!;
-  }
+  // Stream<ConnectStatusEnum> getSocketStatusStream() {
+  //   //Assign the value only once.
+  //   _socketStatusStream ??= _socketStatusController.stream.asBroadcastStream();
+  //   return _socketStatusStream!;
+  // }
 
   Future<bool> connect() async {
     if (_connectStatus == ConnectStatusEnum.connect) {
@@ -93,6 +93,7 @@ class WebSocketProvider {
       // login();
       _connectStatus = ConnectStatusEnum.connect;
       _socketStatusController.add(ConnectStatusEnum.connect);
+      _webSocketChannelStream = _channel?.stream.asBroadcastStream();
       if (_reconnectTimes == 0) {
         logger.i("First successful socket connection.");
       } else {
@@ -119,6 +120,7 @@ class WebSocketProvider {
           .close(status.goingAway, "Close the connection actively.");
 
       _connectStatus = ConnectStatusEnum.close;
+      _webSocketChannelStream = null;
       if (!_socketStatusController.isClosed) {
         _socketStatusController.add(ConnectStatusEnum.close);
       }
@@ -131,7 +133,7 @@ class WebSocketProvider {
       _reconnectTimes++;
       logger.i("Reconnecting, this is the $_reconnectTimes reconnection");
       _reconnectTimer =
-          Timer.periodic(Duration(seconds: _heartTimes), (timer) async {
+          Timer.periodic(Duration(seconds: _heartbeatSeconds), (timer) async {
             await disconnect();
             await connect();
           });
@@ -147,7 +149,7 @@ class WebSocketProvider {
   }
 
   void listen(ListenMessageCallback messageCallback, {ErrorCallback? onError}) {
-    getWebSocketChannelStream().listen((message) {
+    _webSocketChannelStream?.listen((message) {
       messageCallback.call(message);
     }, onError: (error) {
       //Connection exception
@@ -172,14 +174,14 @@ class WebSocketProvider {
       return completer.future;
     }
     try {
-      subscription = getWebSocketChannelStream().listen(
+      subscription = _webSocketChannelStream!.listen(
             (backMessage) {
           // Message sent successfully
               MessageWrapper data = MessageWrapper.fromJson(json.decode(backMessage));
           completer.complete(data);
           // Stop listening because the desired response has been received
           subscription.cancel();
-          logger.i("completer.isCompleted:${completer.isCompleted}");
+          logger.i("completer.isCompleted:${completer.isCompleted},MessageWrapper:${data.toJsonString()}");
         },
         onError: (error) {
           logger.i('Failed to send message: ${error.toString()}');
@@ -195,8 +197,8 @@ class WebSocketProvider {
         logger.i("Future.delayed completer.isCompleted:${completer.isCompleted}");
         if (!completer.isCompleted) {
           logger.i('Timeout: No response from the server');
-          completer
-              .completeError(TimeoutException('No response from the server'));
+          // completer
+          //     .completeError(TimeoutException('No response from the server'));
           subscription.cancel(); // unListen
         }
       });
@@ -221,18 +223,13 @@ class WebSocketProvider {
     return ConnectStatusEnum.closing;
   }
 
-  // Future<void> login() async {
-  //   String token = await _preferenceManager.getString(PreferenceManager.keyToken);
-  //   var message = MessageWrapper(cmd: CmdType.LOGIN,data: {'accessToken':token});
-  //   logger.i('sentHeart: ${message.toJsonString()}');
-  //   sendMsg(message);
-  // }
 
   void startHeartBeat() {
     destroyHeartBeat();
-    _heartBeat = Timer.periodic(Duration(seconds: _heartTimes), (timer) {
-      var message = MessageWrapper(conversationType: ConversationType.HEART_BEAT,data: {"msg":"心跳"});
-      logger.i('sentHeart: ${message.toJsonString()}');
+
+    _heartBeat = Timer.periodic(Duration(seconds: _heartbeatSeconds), (timer) {
+      var message = MessageWrapper(conversationType: ConversationType.HEART_BEAT,data: {"msg":"HeartBeat"});
+      logger.i('send sentHeart: ${message.toJsonString()}');
       sendMsg(message);
     });
   }

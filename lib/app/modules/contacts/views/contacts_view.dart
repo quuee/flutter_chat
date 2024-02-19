@@ -20,7 +20,10 @@ class ContactsView extends BaseView<ContactsController> {
       appBarTitleText: appLocalization.appbarTitle,
       actions: [
         IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.add))
+        // showMenu(context: context, position: position, items: items) PopupMenuButton底层也是showMenu,不用计算位置
+        PopupMenuButton<String>(icon: Icon(Icons.add),itemBuilder: (context){
+          return [PopupMenuItem(child: Text('发起群聊'),value: '发起群聊',)];
+        },)
       ],
     );
   }

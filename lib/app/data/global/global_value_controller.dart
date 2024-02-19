@@ -65,9 +65,9 @@ class GlobalValueController extends GetxController {
           // webSocketProvider.getCurrentStatus()
           Fluttertoast.showToast(msg: error.toString());
         });
-        webSocketProvider.startHeartBeat();
       }
     });
+    webSocketProvider.startHeartBeat();
   }
 
   // 处理不同类型会话
