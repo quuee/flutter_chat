@@ -79,17 +79,13 @@ class GlobalValueController extends GetxController {
           '私聊消息${messageInfo.toJsonString()}',
         );
 
-        _newConversation(messageInfo);
+        ConversationModel newConversation = _newConversation(messageInfo);
+        _switchMessageTypeHandler(messageInfo);
+        newConversation.lastTime = messageInfo.contentTime;
+        newConversation.lastMessage = messageInfo.content;
+        messageMapListAdd(newConversation.conversationId!, messageInfo);
+        isarSaveMessage([messageInfo], newConversation.conversationId!);
 
-        for (var conversation in conversationList) {
-          // 接收服务器消息 当聊天对象是发送对象
-          // if (conversation.contactUserIds.first == receiveInfo.sender.userId) { }
-          _switchMessageTypeHandler(messageInfo);
-          conversation.lastTime = messageInfo.contentTime;
-          conversation.lastMessage = messageInfo.content;
-          messageMapListAdd(conversation.conversationId!, messageInfo);
-          isarSaveMessage([messageInfo], conversation.conversationId!);
-        }
         break;
 
       case ConversationType.GROUP_MESSAGE:
@@ -121,7 +117,7 @@ class GlobalValueController extends GetxController {
       bool b = conversation.contactUserIds.first == messageInfo.sender.userId;
       if(b){
         newConversation = conversation;
-        return ;
+
       }
     }
 
@@ -143,6 +139,7 @@ class GlobalValueController extends GetxController {
           lastTime: messageInfo.contentTime);
       conversationList.add(newConversation);
     }
+    return newConversation;
   }
 
 

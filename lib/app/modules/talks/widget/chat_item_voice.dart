@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/core/audio_player.dart';
 import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,20 +20,20 @@ class ChatItemVoice extends StatefulWidget {
 }
 
 class _ChatItemVoiceState extends State<ChatItemVoice> {
+
   bool _isPlaying = false;
-  final _audioPlayer = AudioPlayer(); // 应该提取出单例
+  final _audioPlayer = AudioPlayUtil(); // 应该提取出单例
 
 
   @override
   void initState() {
     _initAudioPlayerListen();
-    _initSource();
+
     super.initState();
   }
 
   _initAudioPlayerListen(){
-    _audioPlayer.playerStateStream.listen((state) {
-      if (!mounted) return;
+    _audioPlayer.listen((state) {
       switch (state.processingState) {
         case ProcessingState.idle:
         case ProcessingState.loading:
@@ -40,27 +41,23 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
         case ProcessingState.ready:
           break;
         case ProcessingState.completed:
-          setState(() {
-            if (_isPlaying) {
-              _isPlaying = false;
-              // 重置 使可以点击重复播放
-              _audioPlayer.seek(const Duration(seconds: 0));
-              _audioPlayer.stop();
-            }
-          });
+        // 重置 使可以点击重复播放
+          _audioPlayer.seekPlay(const Duration(seconds: 0));
+          _audioPlayer.stop();
+          _isPlaying=false;
           break;
       }
     });
+
   }
 
-  _initSource() async {
-    // TODO 当新的消息进来，新的消息不是播放对应的音频
-
+  _initPlay() async {
     String? path = widget.soundLocalPath;
     String? url = widget.soundUrl;
     if(path != null && path.trim().isNotEmpty){
       if(File(path).existsSync()){
-        _audioPlayer.setFilePath(path);
+        _audioPlayer.setPath(path);
+        _audioPlayer.play();
         return;
       }
     }
@@ -74,20 +71,24 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
       savePath = "${dir?.path}/voices/$last";
     }
 
-    if(File(savePath).existsSync()){
-      return;
-    }
-    // dio 有baseUrl 每次下载都失败，只能重新创建dio
-    Dio().download(url, savePath,onReceiveProgress: (int count,int total){
-      if(count/total == 1){
-        // 存在本地在播放
-        bool existsSync = File(savePath!).existsSync();
-        if(existsSync){
-          _audioPlayer.setFilePath(savePath);
+    if(!File(savePath).existsSync()){
+      // dio 有baseUrl 每次下载都失败，只能重新创建dio
+      Dio().download(url, savePath,onReceiveProgress: (int count,int total){
+        if(count/total == 1){
+          // 存在本地在播放
+          bool existsSync = File(savePath!).existsSync();
+          if(existsSync){
+            _audioPlayer.setPath(savePath);
+            _audioPlayer.play();
+          }
+          print('下载完成');
         }
-        print('下载完成');
-      }
-    });
+      });
+    }else{
+      _audioPlayer.setPath(savePath);
+      _audioPlayer.play();
+    }
+
 
     // 可能网络功能打开不够彻底，在androidManifest.xml application android:usesCleartextTraffic="true"配置
     // await _audioPlayer.setUrl(url!);
@@ -123,12 +124,13 @@ class _ChatItemVoiceState extends State<ChatItemVoice> {
         ),
         onTap: (){
           if(!_isPlaying){
-            _audioPlayer.play();
-            _isPlaying = true;
+            _initPlay();
+            _isPlaying=true;
           }else{
             _audioPlayer.pause();
-            _isPlaying = false;
+            _isPlaying=false;
           }
+
         },
       )
     );
