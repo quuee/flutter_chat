@@ -1,3 +1,5 @@
+import 'package:flutter_chat/app/modules/contacts/controllers/group_controller.dart';
+import 'package:flutter_chat/app/modules/contacts/views/contact_group_view.dart';
 import 'package:flutter_chat/app/modules/contacts/views/contact_simple_view.dart';
 import 'package:flutter_chat/app/modules/login/bindings/LoginBinding.dart';
 import 'package:flutter_chat/app/modules/login/views/login_view.dart';
@@ -37,6 +39,11 @@ class AppPages {
     GetPage(
       name: _Paths.CONTACT_SIMPLE,
       page: () => ContactSimple(),
+    ),
+    GetPage(
+      name: _Paths.GROUP,
+      page: () => ContactGroupView(),
+      binding: BindingsBuilder(()=>Get.lazyPut(() => GroupController()))
     ),
     GetPage(
       name: _Paths.TOCHAT,

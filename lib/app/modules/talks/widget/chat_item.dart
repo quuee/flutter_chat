@@ -61,8 +61,13 @@ class ChatItem extends StatelessWidget {
         // 头像
         isFromMsg?CachedNetworkImage(imageUrl: sender.avatarUrl,width: AppValues.iconLargeSize,):const SizedBox.shrink(),
         // 消息体
-        Expanded(child: widget,),
-
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(sender.nickname),
+            widget
+          ],
+        ),),
         // 头像
         isFromMsg?const SizedBox.shrink():CachedNetworkImage(imageUrl: sender.avatarUrl,width: AppValues.iconLargeSize,),
 

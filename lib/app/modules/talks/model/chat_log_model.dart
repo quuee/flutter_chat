@@ -5,9 +5,9 @@ import 'package:flutter_chat/app/network/model/image_element.dart';
 import 'package:flutter_chat/app/network/model/message_info.dart';
 import 'package:flutter_chat/app/network/model/sound_element.dart';
 import 'package:flutter_chat/app/network/model/user_info.dart';
-import 'package:isar/isar.dart';
 
-part 'chat_log_model.g.dart';
+
+// part 'chat_log_model.g.dart';
 // dart run build_runner build
 
 ChatLogModel chatLogModelFromJson(String str) =>
@@ -15,33 +15,35 @@ ChatLogModel chatLogModelFromJson(String str) =>
 
 String chatLogModelToJson(ChatLogModel data) => json.encode(data.toJson());
 
-@collection
+
 class ChatLogModel {
-  @Name('logId')
-  Id? logId = Isar.autoIncrement;
+
+  int logId;
   // 会话id
-  @Name('conversationId')
   int conversationId;
-  @Name('conversationType')
+  // 群组id
+  int groupId;
+
   int conversationType;
-  @Name('currentUserId')
+
   int currentUserId;
-  @Name('senderId')
+
   int senderId;
-  @Name('contentType')
+
   int contentType;
-  @Name('content')
+
   String content;
-  @Name('contentTime')
+
   String contentTime;
-  @Name('image')
+
   ImageElement? image;
-  @Name('sound')
+
   SoundElement? sound;
 
   ChatLogModel({
-    this.logId,
+    required this.logId,
     required this.conversationId,
+    required this.groupId,
     required this.conversationType,
     required this.currentUserId,
     required this.senderId,
@@ -55,6 +57,7 @@ class ChatLogModel {
   factory ChatLogModel.fromJson(Map<String, dynamic> json) => ChatLogModel(
         logId: json["logId"],
         conversationId: json["conversationId"],
+    groupId: json["groupId"],
         conversationType: json["conversationType"],
         currentUserId: json["currentUserId"],
         senderId: json["senderId"],
@@ -68,6 +71,7 @@ class ChatLogModel {
   Map<String, dynamic> toJson() => {
         "logId": logId,
         "conversationId": conversationId,
+        "groupId": groupId,
         "conversationType": conversationType,
         "currentUserId": currentUserId,
         "senderId": senderId,
@@ -78,23 +82,26 @@ class ChatLogModel {
         "sound": sound,
       };
 
-  static ChatLogModel convertFromReceiveInfo(
-          MessageInfo receiveInfo, int currentUserId, int conversationId) =>
+  static ChatLogModel convertFromMessageInfo(
+          MessageInfo messageInfo, int currentUserId, int conversationId) =>
       ChatLogModel(
+        logId: DateTime.now().millisecondsSinceEpoch,
         conversationId: conversationId,
-        conversationType: receiveInfo.conversationType,
+        groupId: messageInfo.groupId,
+        conversationType: messageInfo.conversationType,
         currentUserId: currentUserId,
-        senderId: receiveInfo.sender.userId,
-        content: receiveInfo.content,
-        contentTime: receiveInfo.contentTime,
-        contentType: receiveInfo.contentType,
-        image: receiveInfo.image,
-        sound: receiveInfo.sound,
+        senderId: messageInfo.sender.userId,
+        content: messageInfo.content,
+        contentTime: messageInfo.contentTime,
+        contentType: messageInfo.contentType,
+        image: messageInfo.image,
+        sound: messageInfo.sound,
       );
 
-  static MessageInfo convertToReceiveInfo(ChatLogModel chatLogModel) =>
+  static MessageInfo convertToMessageInfo(ChatLogModel chatLogModel) =>
       MessageInfo(
           conversationType: chatLogModel.conversationType,
+          groupId: chatLogModel.groupId,
           sender: UserInfo(
               userId: chatLogModel.senderId == chatLogModel.currentUserId
                   ? chatLogModel.currentUserId

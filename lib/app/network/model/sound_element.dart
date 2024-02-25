@@ -1,8 +1,8 @@
 
-import 'package:isar/isar.dart';
-part 'sound_element.g.dart';
 
-@embedded
+// part 'sound_element.g.dart';
+
+
 class SoundElement {
   /// URL address
   String? sourceUrl;
@@ -11,7 +11,7 @@ class SoundElement {
   String? soundLocalPath;
 
   /// Voice file size
-  double? dataSize;
+  double? soundDataSize;
 
   /// time
   int? duration;
@@ -19,12 +19,12 @@ class SoundElement {
   // @Ignore()
   // Stream? voiceStream;
 
-  SoundElement({this.sourceUrl, this.soundLocalPath, this.dataSize, this.duration});
+  SoundElement({this.sourceUrl, this.soundLocalPath, this.soundDataSize, this.duration});
 
   SoundElement.fromJson(Map<String, dynamic> json) {
     sourceUrl = json['sourceUrl'];
     soundLocalPath = json['soundLocalPath'];
-    dataSize = json['dataSize'];
+    soundDataSize = json['soundDataSize'];
     duration = json['duration'];
   }
 
@@ -32,13 +32,13 @@ class SoundElement {
     final data = <String, dynamic>{};
     data['sourceUrl'] = sourceUrl;
     data['soundLocalPath'] = soundLocalPath;
-    data['dataSize'] = dataSize;
+    data['soundDataSize'] = soundDataSize;
     data['duration'] = duration;
     return data;
   }
 
   @override
   String toString() {
-    return 'SoundElem{sourceUrl: $sourceUrl, soundPath: $soundLocalPath, dataSize: $dataSize, duration: $duration}';
+    return 'SoundElem{sourceUrl: $sourceUrl, soundPath: $soundLocalPath, dataSize: $soundDataSize, duration: $duration}';
   }
 }

@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
-
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
-
 import 'package:lpinyin/lpinyin.dart';
-
 import '/app/core/base/base_controller.dart';
 
 class ContactsController extends BaseController {
-  // final PreferenceManager _preferenceManager = Get.find(tag: (PreferenceManager).toString());
-  final Isar _isar = Get.find(tag: (Isar).toString());
+
   List<String> letters = [
     '↑',
     'A',
@@ -163,7 +158,7 @@ class ContactsController extends BaseController {
 
   _convertContacts() async {
 
-    for (ContacterModel element in _globalValueController.cList) {
+    for (ContacterModel element in _globalValueController.contactList) {
       // 提取pinyin首字母
       String p = PinyinHelper.getShortPinyin(element.nickname)
           .substring(0, 1)

@@ -44,6 +44,13 @@ class ContactItem extends StatelessWidget {
       ),
       onTap: () {
 
+        if(contacterModel.nickname == '群聊'){
+          Get.toNamed(Routes.GROUP);
+          return;
+        }
+        if(contacterModel.nickname == '新朋友'){
+
+        }
         Get.toNamed(Routes.CONTACT_SIMPLE, arguments: contacterModel);
       },
     );

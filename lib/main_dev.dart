@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/app/data/local/sqf/my_sqlite.dart';
 
 import 'app/my_app.dart';
 import 'flavors/build_config.dart';
@@ -19,7 +20,8 @@ Future<void> main() async {
     envType: Environment.DEVELOPMENT,
     envConfig: devConfig,
   );
-  // await IsarManager.instance.init();
+
+  await MySqlite.forFeature();
 
 
   runApp(const MyApp());

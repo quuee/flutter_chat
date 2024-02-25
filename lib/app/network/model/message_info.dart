@@ -7,6 +7,7 @@ import 'package:flutter_chat/app/network/model/user_info.dart';
 
 class MessageInfo {
   int conversationType;
+  int groupId;
   UserInfo sender;
   List<UserInfo> receivers;
   // bool sendResult;
@@ -20,6 +21,7 @@ class MessageInfo {
 
   MessageInfo(
       {required this.conversationType,
+      required this.groupId,
       required this.sender,
       required this.receivers,
       required this.serviceName,
@@ -31,6 +33,7 @@ class MessageInfo {
 
   factory MessageInfo.fromJson(Map<String, dynamic> json) => MessageInfo(
         conversationType: json["conversationType"],
+    groupId: json["groupId"],
         sender: UserInfo.fromJson(json["sender"]),
         receivers: List<UserInfo>.from(
             json["receivers"].map((x) => UserInfo.fromJson(x))),
@@ -44,6 +47,7 @@ class MessageInfo {
 
   Map<String, dynamic> toJson() => {
         "conversationType": conversationType,
+        "groupId": groupId,
         "sender": sender,
         "receivers": receivers,
         "serviceName": serviceName,

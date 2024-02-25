@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/app/core/voice_record.dart';
 import 'package:flutter_chat/app/data/global/global_value_controller.dart';
@@ -36,8 +35,7 @@ class ChatController extends GetxController {
   final GlobalValueController _globalValueController =
       Get.find<GlobalValueController>();
 
-  UserDO? get currentUser =>
-      _globalValueController.currentUser;
+  UserDO? get currentUser => _globalValueController.currentUser;
 
   RxMap<int, RxList<MessageInfo>> get messageMapListG =>
       _globalValueController.messageMapList;
@@ -54,12 +52,13 @@ class ChatController extends GetxController {
 
   RxBool selectedCancelArea = false.obs; // 取消区域是否选中
   RxBool selectedSound2WordArea = false.obs; // 取消区域是否选中
-  RxBool selectedPressArea = false.obs;// 按下后 开始录音，改变录音背景，出现录音动画，出现释放发送提示文字
+  RxBool selectedPressArea = false.obs; // 按下后 开始录音，改变录音背景，出现录音动画，出现释放发送提示文字
 
   late VoiceRecord record;
   String? _voicePath;
   int _voiceDuration = 0;
   int _voiceFileSize = 0;
+
   /// =============控制录音界面显示隐藏参数=============== ///
 
   @override
@@ -84,6 +83,8 @@ class ChatController extends GetxController {
     if (messageMapListG[conversation?.conversationId]!.isNotEmpty) {
       conversation?.lastMessage =
           messageMapListG[conversation?.conversationId]!.last.content;
+      conversation?.contentType =
+          messageMapListG[conversation?.conversationId]!.last.contentType;
       conversation?.lastTime = DateTime.now().toString();
       conversation?.currentUserId = currentUser!.userId;
 
@@ -94,55 +95,56 @@ class ChatController extends GetxController {
   }
 
   /// 向上传递参数
-  passParamsCallback(int voiceDuration, String path, int fileSize){
+  passParamsCallback(int voiceDuration, String path, int fileSize) {
     _voiceDuration = voiceDuration;
     _voicePath = path;
     _voiceFileSize = fileSize;
   }
 
-  inputListener(){
+  inputListener() {
     textFocusNode.addListener(() {
-      if(textFocusNode.hasFocus){
+      if (textFocusNode.hasFocus) {
         logger.i('textFocusNode.addListener:${toolBtnOff.value}');
-        toolBtnOff.value = true;//隐藏
+        toolBtnOff.value = true; //隐藏
         keyboardShow.value = true; //显示
-        if(keyboardShow.value){
+        if (keyboardShow.value) {
           leftKeyboardButton.value = false; //显示语音
-        }else{
-
-        }
-
-      }else{
+        } else {}
+      } else {
         keyboardShow.value = false; // 键盘隐藏
         // leftKeyboardButton.value = true;
       }
-
     });
   }
 
-
   _getChatLog() async {
-    conversation = _globalValueController.getConversation(conversation!);
+    conversation = await _globalValueController.getConversation(conversation!);
     _globalValueController.loadChatLog(conversation!.conversationId!);
   }
 
   sendMessage() {
+    int groupId = -1;
+    if (ConversationType.GROUP_MESSAGE == conversation!.conversationType) {
+      groupId = conversation!.conversationId!;
+    }
+
     MessageInfo sendInfo = MessageInfo(
-        conversationType: ConversationType.PRIVATE_MESSAGE,
+        conversationType: conversation!.conversationType,
+        groupId: groupId,
         sender: UserInfo(
             userId: _globalValueController.currentUser!.userId,
             terminal: TerminalType.APP),
         receivers: List.generate(
-            conversation!.contactUserIds.length,
+            conversation!.contactUsers!.length,
             (index) => UserInfo(
-                userId: conversation!.contactUserIds[index],
+                userId: conversation!.contactUsers![index].userId,
                 terminal: TerminalType.APP)),
         serviceName: '',
         contentTime: DateTime.now().toString(),
         contentType: MessageType.text,
         content: sendMessageStr.value);
     var messageWrapper = MessageWrapper(
-        conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
+        conversationType: conversation!.conversationType, data: sendInfo);
 
     _globalValueController.sendMessage(messageWrapper);
 
@@ -153,34 +155,46 @@ class ChatController extends GetxController {
         .isarSaveMessage([sendInfo], conversation!.conversationId!);
 
     textEditingController.clear();
-    sendMessageStr.value = '';
+    sendMessageStr.value = "";
   }
 
-  sendImage(String imageLocalPath,String filename,String mimeType) async {
-    ApiResult? result = await FileUploadApi.uploadFile(filePath: imageLocalPath,filename: filename,mimeType: mimeType);
-    String imageUrl='';
-    if(result?.code == 0){
+  sendImage(
+    String imageLocalPath,
+    String filename,
+    String mimeType,
+  ) async {
+    ApiResult? result = await FileUploadApi.uploadFile(
+        filePath: imageLocalPath, filename: filename, mimeType: mimeType);
+    String imageUrl = '';
+    if (result?.code == 0) {
       imageUrl = result?.data;
     }
 
-    ImageElement image = ImageElement(imageLocalPath: imageLocalPath,imageUrl: imageUrl);
+    int groupId = -1;
+    if (ConversationType.GROUP_MESSAGE == conversation!.conversationType) {
+      groupId = conversation!.conversationId!;
+    }
+
+    ImageElement image =
+        ImageElement(imageLocalPath: imageLocalPath, imageUrl: imageUrl);
     MessageInfo sendInfo = MessageInfo(
-        conversationType: ConversationType.PRIVATE_MESSAGE,
+        conversationType: conversation!.conversationType,
+        groupId: groupId,
         sender: UserInfo(
             userId: _globalValueController.currentUser!.userId,
             terminal: TerminalType.APP),
         receivers: List.generate(
-            conversation!.contactUserIds.length,
-                (index) => UserInfo(
-                userId: conversation!.contactUserIds[index],
+            conversation!.contactUsers!.length,
+            (index) => UserInfo(
+                userId: conversation!.contactUsers![index].userId,
                 terminal: TerminalType.APP)),
         serviceName: '',
         contentTime: DateTime.now().toString(),
         contentType: MessageType.picture,
         content: '[图片]',
-    image: image);
+        image: image);
     var messageWrapper = MessageWrapper(
-        conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
+        conversationType: conversation!.conversationType, data: sendInfo);
 
     _globalValueController.sendMessage(messageWrapper);
 
@@ -193,23 +207,36 @@ class ChatController extends GetxController {
 
   sendVoice() async {
     double fileSizeInMB = _voiceFileSize / (1024 * 1024);
-    ApiResult? result = await FileUploadApi.uploadFile(filePath: _voicePath!,filename: _voicePath!.split('/').last,mimeType: 'audio');
-    String voiceUrl='';
-    if(result?.code == 0){
+    ApiResult? result = await FileUploadApi.uploadFile(
+        filePath: _voicePath!,
+        filename: _voicePath!.split('/').last,
+        mimeType: 'audio');
+    String voiceUrl = '';
+    if (result?.code == 0) {
       voiceUrl = result?.data;
       // voiceStream = result?.data
     }
 
-    SoundElement voice = SoundElement(sourceUrl: voiceUrl,soundLocalPath:_voicePath,dataSize: fileSizeInMB,duration: _voiceDuration);
+    int groupId = -1;
+    if (ConversationType.GROUP_MESSAGE == conversation!.conversationType) {
+      groupId = conversation!.conversationId!;
+    }
+
+    SoundElement voice = SoundElement(
+        sourceUrl: voiceUrl,
+        soundLocalPath: _voicePath,
+        soundDataSize: fileSizeInMB,
+        duration: _voiceDuration);
     MessageInfo sendInfo = MessageInfo(
-        conversationType: ConversationType.PRIVATE_MESSAGE,
+        conversationType: conversation!.conversationType,
+        groupId: groupId,
         sender: UserInfo(
             userId: _globalValueController.currentUser!.userId,
             terminal: TerminalType.APP),
         receivers: List.generate(
-            conversation!.contactUserIds.length,
-                (index) => UserInfo(
-                userId: conversation!.contactUserIds[index],
+            conversation!.contactUsers!.length,
+            (index) => UserInfo(
+                userId: conversation!.contactUsers![index].userId,
                 terminal: TerminalType.APP)),
         serviceName: '',
         contentTime: DateTime.now().toString(),
@@ -217,7 +244,7 @@ class ChatController extends GetxController {
         content: '',
         sound: voice);
     var messageWrapper = MessageWrapper(
-        conversationType: ConversationType.PRIVATE_MESSAGE, data: sendInfo);
+        conversationType: conversation!.conversationType, data: sendInfo);
 
     _globalValueController.sendMessage(messageWrapper);
 

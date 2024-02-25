@@ -5,7 +5,6 @@ import 'package:flutter_chat/app/core/values/app_colors.dart';
 import 'package:flutter_chat/app/core/values/app_values.dart';
 import 'package:flutter_chat/app/core/widget/asset_image_view.dart';
 import 'package:flutter_chat/app/core/widget/custom_app_bar.dart';
-import 'package:flutter_chat/app/model/user_do.dart';
 import 'package:flutter_chat/app/modules/contacts/model/contacter_model.dart';
 import 'package:flutter_chat/app/modules/talks/controllers/chat_controller.dart';
 import 'package:flutter_chat/app/modules/talks/widget/chat_item.dart';
@@ -271,18 +270,19 @@ class ChatView extends GetView<ChatController> {
               messageInfo.sender.userId != controller.currentUser?.userId;
 
           ContacterModel? contacter;
-          controller.conversation?.contactUsers?.forEach((ContacterModel element) {
-            if(element.userId == messageInfo.sender.userId){
-              contacter = element;
-            }
-          });
 
           if(isFromMsg){
             // 联系人发来
             // sender = UserDO(userId: controller.conversation.c, account: account, password: password, nickname: nickname, avatarUrl: avatarUrl, phone: phone, email: email, token: token)
+
+            controller.conversation?.contactUsers?.forEach((ContacterModel element) {
+              if(element.userId == messageInfo.sender.userId){
+                contacter = element;
+              }
+            });
           }else{
             // 自己发的
-            contacter = ContacterModel(userId: controller.currentUser?.userId,
+            contacter = ContacterModel(userId: controller.currentUser!.userId,
                 account: controller.currentUser!.account,
                 nickname: controller.currentUser!.nickname,
                 phone: controller.currentUser?.phone??'',

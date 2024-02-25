@@ -82,7 +82,7 @@ class ConversationView extends BaseView<ConversationController> {
             leading: CachedNetworkImage(
                 width: AppValues.iconLargeSize * 2,
                 height: AppValues.iconLargeSize * 2,
-                imageUrl: conversation.avatarUrl),
+                imageUrl: conversation.conversationThumb),
             title: Text(conversation.conversationName),
             subtitle: Text(conversation.lastMessage ?? '',maxLines: 1,overflow: TextOverflow.ellipsis,),
             trailing: Text(DateUtil.formatTime(conversation.lastTime) ?? ''),

@@ -10,6 +10,7 @@ abstract class Routes {
   static const CHAT = _Paths.CHAT;
   static const TOCHAT = _Paths.TOCHAT;
   static const CONTACTS = _Paths.CONTACTS;
+  static const GROUP = _Paths.GROUP;
   static const CONTACT_SIMPLE = _Paths.CONTACT_SIMPLE;
 
   static const EXPLORE = _Paths.EXPLORE;
@@ -28,6 +29,7 @@ abstract class _Paths {
 
   static const CONTACTS = '/contacts';
   static const CONTACT_SIMPLE = '/contact_simple';
+  static const GROUP = '/group';
 
   static const EXPLORE = '/explore';
   static const ME = '/me';
