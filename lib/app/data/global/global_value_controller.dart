@@ -1,10 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_chat/app/core/id_util.dart';
 import 'package:flutter_chat/app/data/local/preference/preference_manager.dart';
-import 'package:flutter_chat/app/data/local/sqf/chat_log_dao.dart';
-import 'package:flutter_chat/app/data/local/sqf/contact_dao.dart';
-import 'package:flutter_chat/app/data/local/sqf/conversation_contact_dao.dart';
-import 'package:flutter_chat/app/data/local/sqf/conversation_dao.dart';
 import 'package:flutter_chat/app/data/remote/group_api.dart';
 import 'package:flutter_chat/app/data/remote/user_api.dart';
 import 'package:flutter_chat/app/model/api_result.dart';
@@ -138,17 +134,19 @@ class GlobalValueController extends GetxController {
     }
 
     if (newConversation == null) {
-      List<ContacterModel> ctemp =
-          await ContactDao.instance().findById(messageInfo.sender.userId);
+      // List<ContacterModel> ctemp =
+      //     await ContactDao.instance().findById(messageInfo.sender.userId);
+      ApiResult? apiResult = await UserApi.oneContact(messageInfo.sender.userId);
+      ContacterModel contacterModel = ContacterModel.fromJson(apiResult?.data);
 
       // 不存在会话 则创建
       newConversation = ConversationModel(
           conversationId: IdUtil.getId(),
-          contactUsers: ctemp,
+          contactUsers: [contacterModel],
           conversationType: ConversationType.PRIVATE_MESSAGE,
           currentUserId: currentUser?.userId,
-          conversationName: ctemp.first.nickname,
-          conversationThumb: ctemp.first.avatarUrl,
+          conversationName: contacterModel.nickname,
+          conversationThumb: contacterModel.avatarUrl,
           contentType: messageInfo.contentType,
           lastMessage: messageInfo.content,
           lastTime: messageInfo.contentTime);

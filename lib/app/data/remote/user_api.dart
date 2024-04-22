@@ -43,4 +43,21 @@ class UserApi {
       return null;
     }
   }
+
+  static Future<ApiResult?> oneContact(int contactId) async {
+
+    Map<String, dynamic> map = {};
+    map['contactId'] = contactId;
+    var op = Options(
+        contentType: Headers.jsonContentType,
+        method: DioUtil.get);
+    try {
+
+      Response response =  await DioUtil().request('/contact/one', params: map,options: op);
+      return ApiResult.fromJson(response.data);
+    } on DioException catch (e) {
+
+      return null;
+    }
+  }
 }
